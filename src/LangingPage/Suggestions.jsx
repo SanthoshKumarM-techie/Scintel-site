@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 
 function Suggestions() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     type: 'General Feedback',
     title: '',
@@ -11,19 +13,16 @@ function Suggestions() {
   const [proofFile, setProofFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isShaking, setIsShaking] = useState(false); // New state for error animation
+  const [isShaking, setIsShaking] = useState(false);
 
-  // Animation Refs & State
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // 1. Trigger Initial Load
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
   }, []);
 
-  // 2. Intersection Observer for Scroll Reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -59,7 +58,6 @@ function Suggestions() {
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // Trigger Shake Animation
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
       return;
@@ -70,13 +68,11 @@ function Suggestions() {
   return (
     <>
        <style>{`
-        /* Gray Scrollbar for Textarea */
         .gray-scrollbar::-webkit-scrollbar { width: 6px; }
         .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
         .gray-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
 
-        /* Error Shake Animation */
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }
@@ -90,13 +86,12 @@ function Suggestions() {
       <div 
         ref={sectionRef}
         id='suggestions' 
-        // Standard layout consistency
         className='min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 perspective-[1000px]'
       >
         <div className='max-w-7xl mx-auto px-6 md:px-12 w-full'>
           
           {/* Header */}
-          <div className="pb-8 overflow-hidden">
+          <div className="pb-8 overflow-hidden flex items-center justify-between">
             <h1 
               className={`text-[40px] font-extrabold text-[#023347] mb-3 w-fit tracking-tight transform transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 isVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-20 opacity-0 blur-sm"
@@ -104,6 +99,30 @@ function Suggestions() {
             >
               Suggestions / Complaints
             </h1>
+
+            <button
+              onClick={() => navigate('/')}
+              className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
+                transition-all duration-300 ease-out
+                hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
+                transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
+              `}
+              style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+              </svg>
+              Back
+            </button>
           </div>
 
           {/* MAIN FORM CARD */}

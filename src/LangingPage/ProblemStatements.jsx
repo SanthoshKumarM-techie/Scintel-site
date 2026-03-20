@@ -5,16 +5,13 @@ function ProblemStatements() {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   
-  // Animation Refs & State
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1. Trigger Initial Load
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
   }, []);
 
-  // 2. Intersection Observer for Scroll Reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -62,7 +59,6 @@ function ProblemStatements() {
   return (
     <>
       <style>{`
-        /* Gray Scrollbar Styling (Consistent with other pages) */
         .gray-scrollbar::-webkit-scrollbar { width: 6px; }
         .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
@@ -72,7 +68,6 @@ function ProblemStatements() {
       <div 
         ref={sectionRef}
         id='problems' 
-        // Layout: Min-height screen, Relative Z-40 to sit on top of previous pages
         className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 perspective-[1000px] relative z-40"
       >
         
@@ -86,18 +81,44 @@ function ProblemStatements() {
             Problem Statements
           </h2>
 
-          <button
-  onClick={() => navigate("/verification")}
-  className="bg-[#023347] text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-[#388E9C] transition-all duration-300"
->
-  Add Problem Statement
-</button>
+          {/* Button Group: Back on top, Add Problem below */}
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
+                transition-all duration-300 ease-out
+                hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
+                transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
+              `}
+              style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+              </svg>
+              Back
+            </button>
+
+            <button
+              onClick={() => navigate("/verification")}
+              className="bg-[#023347] text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-[#388E9C] transition-all duration-300"
+            >
+              Add Problem Statement
+            </button>
+          </div>
         </div>
 
         {/* TABLE CONTAINER */}
         <div className="px-6 md:px-12 max-w-7xl mx-auto w-full">
           <div 
-            // Height fixed to 75vh to match Association Members table feel
             className={`bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[75vh] transform-gpu transition-all duration-1000 delay-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
               isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98]"
             }`}
@@ -111,12 +132,10 @@ function ProblemStatements() {
             </div>
 
             {/* Scrollable List Area */}
-            {/* Added 'gray-scrollbar' and 'overscroll-auto' */}
             <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y">
               {problems.map((item, idx) => (
                 <div 
                   key={idx} 
-                  // Staggered Animation & Hover Physics
                   className={`group/row relative grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl 
                     transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
                     hover:bg-[#F5F9FA] hover:shadow-md hover:-translate-y-1 hover:scale-[1.005] hover:border-gray-200
@@ -145,7 +164,7 @@ function ProblemStatements() {
                   <div className="md:col-span-4 flex flex-col md:items-center">
                     <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1">Action</span>
                     <button
-                     onClick={() => navigate("/cgpa-calculator")}
+                      onClick={() => navigate("/cgpa-calculator")}
                       className="bg-[#023347] text-white font-bold px-6 py-2 rounded-xl text-xs shadow-sm 
                         transition-all duration-300 ease-out
                         hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"

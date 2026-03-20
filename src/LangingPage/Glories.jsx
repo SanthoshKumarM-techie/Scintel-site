@@ -121,7 +121,7 @@ function Glories() {
                 
                 {/* Image Section - PLUS ICON REMOVED */}
                 <div 
-                  className="w-full h-56 overflow-hidden relative cursor-zoom-in"
+                   className="w-full aspect-[16/9] overflow-hidden relative cursor-zoom-in"
                   onClick={() => setSelectedImage(item.img)}
                 >
                   <img
