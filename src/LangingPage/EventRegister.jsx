@@ -38,7 +38,8 @@ function EventRegister() {
             <img 
               src={event.brochure_url} 
               alt="Event Brochure" 
-              className="w-full h-full object-contain"
+              /* FIXED: Changed object-contain to object-cover to remove black sides */
+              className="w-full h-full object-cover" 
             />
           </div>
 
