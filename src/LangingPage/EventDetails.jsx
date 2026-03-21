@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // ← added useNavigate
 
 const EventDetails = () => {
   const { id } = useParams(); 
+  const navigate = useNavigate(); // ← added
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -10,7 +11,6 @@ const EventDetails = () => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
-        // Using your localhost API structure
         const response = await fetch(`http://localhost:3000/api/activities/event/${id}`);
         const data = await response.json();
         setEventData(data);
@@ -27,13 +27,27 @@ const EventDetails = () => {
   if (loading) return <div className="p-10 text-center font-bold">Loading Event Details...</div>;
   if (!eventData) return <div className="p-10 text-center">Event not found.</div>;
 
-  // Transform single string values into arrays for the gallery
   const photos = eventData.event_image_url ? [eventData.event_image_url] : [];
   
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-12 bg-white text-slate-800">
-      
-      {/* 1. Header & Description (Always Visible) */}
+    <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 bg-white text-slate-800">
+
+      {/* ← Back Button (matches Activities page style) */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
+            transition-all duration-300 ease-out
+            hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+          </svg>
+          Back
+        </button>
+      </div>
+
+      {/* 1. Header & Description */}
       <section className="mb-10">
         <h1 className="text-3xl font-bold text-[#0a2e3f] mb-2">{eventData.title}</h1>
         <p className="text-sm font-semibold text-blue-600 mb-6 italic tracking-wide">Batch: {eventData.batch}</p>
@@ -41,7 +55,7 @@ const EventDetails = () => {
         <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">{eventData.description}</p>
       </section>
 
-      {/* 2. Resource Person - Conditional Rendering */}
+      {/* 2. Resource Person */}
       {eventData.resource_person_name && (
         <section className="mb-10 animate-fade-in">
           <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Resource Person</h2>
@@ -68,21 +82,21 @@ const EventDetails = () => {
         <p className="text-sm text-gray-500">{eventData.participants} Students</p>
       </section>
 
-      {/* 4. Event Gallery */}
+      {/* 4. Photos */}
       {photos.length > 0 && (
         <section className="mb-10">
           <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Photos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {photos.map((photo, index) => (
               <div key={index} className="aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
-                 <img src={`/images/${photo}`} alt="Event Gallery" className="w-full h-full object-cover" />
+                <img src={`/images/${photo}`} alt="Event Gallery" className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* 5. Winner Section - Conditional Rendering */}
+      {/* 5. Winner */}
       {eventData.winner_name && (
         <section className="mb-10 animate-fade-in">
           <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Winner</h2>
@@ -99,7 +113,7 @@ const EventDetails = () => {
         </section>
       )}
 
-      {/* 6. Testimonials - Conditional Rendering */}
+      {/* 6. Testimonials */}
       {eventData.testimonials_name && (
         <section>
           <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Testimonials</h2>

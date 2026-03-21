@@ -45,7 +45,20 @@ function Activities() {
           <h1 className={`text-[40px] font-extrabold text-[#023347] tracking-tight transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
             {batch} Events
           </h1>
-          <button onClick={() => navigate(-1)} className="text-[#388E9C] font-bold hover:underline mb-3">← Back</button>
+          <button
+  onClick={() => navigate(-1)}
+  className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
+    transition-all duration-300 ease-out
+    hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
+    transform mb-3 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
+  `}
+  style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+  </svg>
+  Back
+</button>
         </div>
 
         {loading ? (
