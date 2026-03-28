@@ -56,7 +56,7 @@ function Glories() {
       {/* --- AMBIENT DEPTH LAYER --- */}
       <div className="absolute top-0 left-0 w-full h-[300px] md:h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      {/* --- ELITE LIGHTBOX (Refined Obsidian) --- */}
+      {/* --- ELITE LIGHTBOX --- */}
       {selectedImage && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out transition-all duration-500"
@@ -81,7 +81,8 @@ function Glories() {
         </div>
       )}
 
-      <section ref={sectionRef} className="max-w-[1500px] mx-auto px-5 md:px-10 py-12 md:py-20 w-full">
+      {/* Added pt-24 to section to ensure header and cards don't hit the screen top */}
+      <section ref={sectionRef} className="max-w-[1500px] mx-auto px-5 md:px-10 py-12 md:py-24 w-full">
         
         {/* --- PROFESSIONAL HEADER SECTION --- */}
         <header className="mb-10 md:mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-6 md:gap-8 border-b border-[#023347]/5 pb-8 md:pb-10">
@@ -97,7 +98,6 @@ function Glories() {
             </h1>
           </div>
 
-          {/* Navigation Controls - Hidden on small mobile to prioritize swipe */}
           <div className={`hidden sm:flex gap-4 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <button onClick={() => scroll('left')} className="group p-3 md:p-4 rounded-full border border-[#023347]/10 text-[#023347] hover:border-[#D4AF37] transition-all">
               <svg className="w-4 h-4 md:w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
@@ -109,9 +109,10 @@ function Glories() {
         </header>
 
         {/* --- CORPORATE SNAP GRID --- */}
+        {/* Added pt-12 to container to give floating cards room to move upward */}
         <div 
           ref={scrollContainerRef}
-          className="grid grid-rows-2 grid-flow-col gap-x-6 md:gap-x-12 gap-y-8 md:gap-y-16 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10"
+          className="grid grid-rows-2 grid-flow-col gap-x-6 md:gap-x-12 gap-y-8 md:gap-y-16 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10 pt-12"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading ? (
@@ -129,7 +130,8 @@ function Glories() {
                   animationDelay: `${index * 0.1}s`
                 }}
               >
-                <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border border-black/5 bg-white/[0.02] backdrop-blur-[4px] transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-3">
+                {/* Darkened border to border-[#023347]/15 for better contrast */}
+                <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border border-[#023347]/15 bg-white/80 backdrop-blur-[6px] transition-all duration-700 hover:border-[#D4AF37]/60 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-4">
                   
                   <div 
                     className="relative aspect-video rounded-[1rem] md:rounded-[1.5rem] overflow-hidden cursor-zoom-in"
@@ -182,7 +184,7 @@ function Glories() {
         @media (min-width: 768px) {
            @keyframes gentle-float {
               0% { transform: translateY(0px); }
-              100% { transform: translateY(-12px); }
+              100% { transform: translateY(-16px); }
            }
         }
 
