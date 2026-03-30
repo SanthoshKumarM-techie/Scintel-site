@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function UpcomingEvents() {
   const navigate = useNavigate();
@@ -69,7 +68,6 @@ export default function UpcomingEvents() {
     <div 
       ref={sectionRef} 
       id="events" 
-      // Added pt-32 to prevent the "floating" cards from hitting the top
       className="relative bg-[#FDFCFB] min-h-screen text-[#023347] selection:bg-[#D4AF37]/20 overflow-hidden pt-32 pb-10 flex flex-col justify-center"
     >
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
@@ -82,34 +80,32 @@ export default function UpcomingEvents() {
               <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
                 Calendar of Excellence
               </span>
-              
             </div>
             <h2 className={`text-5xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
               Upcoming <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Events</span>
             </h2>
           </div>
 
-          <div className={`flex gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`flex gap-3 md:gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <button 
               onClick={() => activeIndex > 0 && scrollToPage(activeIndex - 1)} 
               disabled={activeIndex === 0}
-              className={`p-4 rounded-full border border-[#023347]/10 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:bg-white'}`}
+              className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-[#023347]/20 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-30' : 'hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 active:scale-95'}`}
             >
-              <ChevronLeft size={20} />
+              <svg className="w-5 h-5 md:w-6 md:h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button 
               onClick={() => activeIndex < pages.length - 1 && scrollToPage(activeIndex + 1)} 
               disabled={activeIndex === pages.length - 1 || pages.length === 0}
-              className={`p-4 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 || pages.length === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-[#D4AF37] hover:scale-105 active:scale-95'}`}
+              className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 || pages.length === 0 ? 'opacity-30' : 'hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95'}`}
             >
-              <ChevronRight size={20} />
+              <svg className="w-5 h-5 md:w-6 md:h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </header>
 
         <div 
           ref={scrollRef} 
-          // Added pt-10 here to allow the cards to float upward without clipping
           className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar pt-10"
         >
           {pages.length > 0 ? (
@@ -119,16 +115,14 @@ export default function UpcomingEvents() {
                   {pageCards.map((event, idx) => (
                     <article 
                       key={event.id || idx} 
-                      className={`group relative transition-all duration-[1s] ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                      className={`group relative transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
                       style={{ 
                         transitionDelay: `${idx * 150}ms`,
                         animation: isVisible ? `gentle-float ${4 + (idx % 2)}s ease-in-out infinite alternate` : 'none',
                       }}
                     >
-                      {/* Darkened border to border-[#023347]/15 for better visibility */}
-                      <div className="relative flex flex-col sm:flex-row bg-white/80 backdrop-blur-[8px] rounded-[2rem] border border-[#023347]/15 transition-all duration-700 hover:border-[#D4AF37]/60 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-4 overflow-hidden h-full">
+                      <div className="relative flex flex-col sm:flex-row bg-white/80 backdrop-blur-[8px] rounded-[2rem] border-2 border-[#023347]/15 transition-all duration-700 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3 overflow-hidden h-full">
                         
-                        {/* Image Frame */}
                         <div className="w-full sm:w-[220px] h-[240px] sm:h-auto overflow-hidden relative bg-[#023347]/5">
                           {event.brochure_url && event.brochure_url.startsWith('http') ? (
                             <img 
@@ -144,7 +138,6 @@ export default function UpcomingEvents() {
                           <div className="absolute inset-0 bg-gradient-to-r from-[#023347]/20 via-transparent to-transparent" />
                         </div>
 
-                        {/* Content Area */}
                         <div className="p-8 flex flex-col justify-between flex-1 font-sans">
                           <div>
                             <h3 className="text-xl font-bold text-[#023347] mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
@@ -159,7 +152,7 @@ export default function UpcomingEvents() {
                             <button 
                               type="button"
                               onClick={() => navigate(`/event-register/${event.id}/${event.type}`)}
-                              className="group/btn w-full h-[52px] bg-[#023347] text-white rounded-[1rem] text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] shadow-lg active:scale-95"
+                              className="w-full bg-[#023347] text-white py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
                             >
                               View Details
                             </button>

@@ -55,7 +55,7 @@ export default function ExecutiveMember() {
           {members.map((member, index) => (
             <article 
               key={member.id}
-              className={`transition-all duration-[1s] ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+              className={`transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
               style={{ 
                 transitionDelay: `${index * 100}ms`,
                 // Applying Design System Idle Float
@@ -64,10 +64,10 @@ export default function ExecutiveMember() {
               }}
             >
               {/* --- CORPORATE GLASS MODULE --- */}
-              <div className="group relative p-6 rounded-[2rem] border border-black/5 bg-white/[0.02] backdrop-blur-[4px] transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:shadow-[#D4AF37]/10 flex items-center gap-6">
+              <div className="group relative p-6 rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-white/[0.02] backdrop-blur-[4px] transition-all duration-700 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3 flex items-center gap-6">
                 
                 {/* Image Frame (Circle Variant) */}
-                <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border border-black/5 p-1 transition-all duration-700 group-hover:border-[#D4AF37]/50 flex-shrink-0">
+                <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[1.5px] border-[#023347]/10 p-1 transition-all duration-700 group-hover:border-[#D4AF37]/50 flex-shrink-0">
                   <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
                     <img 
                       src={member.image} 

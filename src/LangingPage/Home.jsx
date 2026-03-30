@@ -29,7 +29,7 @@ function Home() {
   const textOpacity = Math.max(0, 1 - scrollY / 800);
 
   return (
-    <div id='home' className='min-h-screen bg-[#FDFCFB] select-none overflow-x-hidden -mt-20'>
+    <div id='home' className='min-h-screen bg-[#FDFCFB] overflow-x-hidden -mt-20 selection:bg-[#D4AF37]/20'>
       
       {/* --- PROFESSIONAL HERO SECTION --- */}
       <div 
@@ -58,7 +58,7 @@ function Home() {
         >
           <div 
             ref={glassRef}
-            className="relative bg-white/[0.02] backdrop-blur-[4px] border border-white/10 rounded-[2.5rem] py-16 md:py-24 px-10 text-center shadow-2xl"
+            className="relative bg-white/[0.02] backdrop-blur-[4px] border-2 border-white/20 rounded-[2.5rem] py-16 md:py-24 px-10 text-center shadow-2xl"
           >
             {/* PRE-HEADER (Standard Font) */}
             <div className="flex items-center justify-center gap-4 mb-8">
@@ -83,7 +83,7 @@ function Home() {
 
       {/* --- OBJECTIVES SECTION --- */}
       <section className="relative z-30 max-w-[1500px] mx-auto px-6 -mt-24 pb-40">
-        <div className={`bg-white rounded-[2rem] border border-black/5 p-10 md:p-20 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] ${loaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+        <div className={`bg-white rounded-[2rem] border-2 border-black/5 p-10 md:p-20 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] ${loaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
           
           <div className="mb-20">
              <div className="flex items-center gap-4 mb-6">
@@ -104,7 +104,7 @@ function Home() {
             ].map((obj, i) => (
               <div 
                 key={i} 
-                className="group p-10 rounded-[2rem] border border-black/[0.03] bg-[#FDFCFB]/50 hover:border-[#D4AF37]/30 hover:bg-white transition-all duration-700 hover:shadow-2xl hover:shadow-[#D4AF37]/5 hover:-translate-y-3"
+                className="group p-10 rounded-[2rem] border-2 border-[#023347]/10 bg-[#FDFCFB]/50 hover:border-[#D4AF37]/50 hover:bg-white transition-all duration-700 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3"
                 style={{ animation: `gentle-float ${5 + i}s ease-in-out infinite alternate` }}
               >
                 <div className="w-16 h-16 mb-10 rounded-2xl bg-[#023347]/5 flex items-center justify-center text-[#023347] group-hover:bg-[#023347] group-hover:text-white transition-all duration-500 shadow-sm">

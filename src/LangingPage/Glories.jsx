@@ -91,7 +91,6 @@ function Glories() {
         </div>
       )}
 
-      {/* Added pt-24 to section to ensure header and cards don't hit the screen top */}
       <section ref={sectionRef} className="max-w-[1500px] mx-auto px-5 md:px-10 py-12 md:py-24 w-full">
         
         {/* --- PROFESSIONAL HEADER SECTION --- */}
@@ -108,20 +107,21 @@ function Glories() {
             </h1>
           </div>
 
-          <div className={`flex gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Unified Consistent Navigation Buttons */}
+          <div className={`flex gap-3 md:gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <button
               onClick={() => activeIndex > 0 && scrollToPage(activeIndex - 1)}
               disabled={activeIndex === 0}
-              className={`p-4 rounded-full border border-[#023347]/10 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:bg-white'}`}
+              className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-[#023347]/20 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-30' : 'hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 active:scale-95'}`}
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 transition-transform" />
             </button>
             <button
               onClick={() => activeIndex < pages.length - 1 && scrollToPage(activeIndex + 1)}
               disabled={activeIndex === pages.length - 1 || pages.length === 0}
-              className={`p-4 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 || pages.length === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-[#D4AF37] hover:scale-105 active:scale-95'}`}
+              className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 || pages.length === 0 ? 'opacity-30' : 'hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95'}`}
             >
-              <ChevronRight size={20} />
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 transition-transform" />
             </button>
           </div>
         </header>
@@ -143,7 +143,6 @@ function Glories() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 pb-10">
                   {pageCards.map((item, index) => {
                     const absoluteIndex = pageIndex * cardsPerPage + index;
-
                     return (
                       <article
                         key={item.id || absoluteIndex}
@@ -156,7 +155,8 @@ function Glories() {
                           animationDelay: `${index * 0.1}s`
                         }}
                       >
-                        <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border border-[#023347]/15 bg-white/80 backdrop-blur-[6px] transition-all duration-700 hover:border-[#D4AF37]/60 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-4">
+                        {/* Upgraded to border-2 */}
+                        <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border-2 border-[#023347]/15 bg-white/80 backdrop-blur-[6px] transition-all duration-700 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-4">
                           <div
                             className="relative aspect-video rounded-[1rem] md:rounded-[1.5rem] overflow-hidden cursor-zoom-in"
                             onClick={() => setSelectedImage(item.image_url || item.img)}
@@ -210,14 +210,7 @@ function Glories() {
 
         @keyframes gentle-float {
           0% { transform: translateY(0px); }
-          100% { transform: translateY(-8px); }
-        }
-
-        @media (min-width: 768px) {
-           @keyframes gentle-float {
-              0% { transform: translateY(0px); }
-              100% { transform: translateY(-16px); }
-           }
+          100% { transform: translateY(-12px); }
         }
 
         .animate-in { 

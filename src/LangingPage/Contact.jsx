@@ -77,7 +77,7 @@ export default function Contact() {
           {contacts.map((person, index) => (
             <article
               key={person.id}
-              className={`group relative transition-all duration-[1s] ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+              className={`group relative transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
               style={{ 
                 transitionDelay: `${index * 150}ms`,
                 // 3. MOTION PHYSICS
@@ -85,10 +85,10 @@ export default function Contact() {
               }}
             >
               {/* --- 2. CORPORATE GLASS MODULE --- */}
-              <div className="bg-white/[0.02] backdrop-blur-[4px] rounded-[2rem] border border-black/5 p-10 flex flex-col items-center text-center transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3">
+              <div className="bg-white/[0.02] backdrop-blur-[4px] rounded-[2rem] border-[1.5px] border-[#023347]/10 p-10 flex flex-col items-center text-center transition-all duration-700 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3">
                 
                 {/* Avatar Frame */}
-                <div className="w-32 h-32 md:w-36 md:h-36 rounded-full mb-8 p-1 border border-black/5 group-hover:border-[#D4AF37]/50 transition-all duration-700 overflow-hidden bg-white/50 shadow-inner">
+                <div className="w-32 h-32 md:w-36 md:h-36 rounded-full mb-8 p-1 border-[1.5px] border-[#023347]/10 group-hover:border-[#D4AF37]/50 transition-all duration-700 overflow-hidden bg-white/50 shadow-inner">
                   {person.image ? (
                     <img src={person.image} alt={person.name} className="w-full h-full object-cover rounded-full" />
                   ) : (
