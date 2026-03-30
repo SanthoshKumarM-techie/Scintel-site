@@ -2,52 +2,39 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 const Suggestion = sequelize.define("Suggestion", {
-
   suggestion_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true
+    primaryKey: true,
+    autoIncrement: true
   },
-
-  type: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-
   title: {
     type: DataTypes.STRING,
     allowNull: false
   },
-
   description: {
     type: DataTypes.TEXT,
     allowNull: false
   },
-
-  category: {
+  status: {
     type: DataTypes.STRING,
     allowNull: false
   },
-
-  proof_url: {
-    type: DataTypes.STRING,
-    allowNull: true   // ✅ changed
-  },
-
-  priority: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-
-  date: {
-    type: DataTypes.DATE,
+  email: {
+    type: DataTypes.STRING,
     allowNull: false
   },
-
-  user_id: {
-    type: DataTypes.INTEGER,
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  year: {
+    type: DataTypes.STRING,
     allowNull: false
   }
-
 }, {
   tableName: "suggestions",
   timestamps: false

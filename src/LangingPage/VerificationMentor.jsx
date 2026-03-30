@@ -1,46 +1,52 @@
-import React, { useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Verification() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // ✅ Extract problem_id from navigation state
-  const problem_id = location.state?.problem_id;
-
   const [showOTP, setShowOTP] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null); // 'success' or 'error'
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone_number: "",
     year: "",
     section: "",
-    mentor: ""
+    mentor: "",
+    mentor_mail_id: ""
   });
   
+  const navigate = useNavigate();
   const inputs = useRef([]);
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleVerify = async (e) => {
+  const handleVerifyRequest = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      // ✅ Step 1: Send OTP to user email
       const response = await fetch("http://localhost:3000/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
       });
-      
       if (response.ok) {
         setShowOTP(true);
+        setStatus(null);
       } else {
-        alert("Error sending OTP. Please check your email address.");
+        setStatus("error");
+        setTimeout(() => setStatus(null), 5000);
       }
     } catch (error) {
-      console.error("OTP Error:", error);
+      setStatus("error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,98 +56,164 @@ export default function Verification() {
     }
   };
 
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (inputs.current[index].value !== "") {
+        inputs.current[index].value = "";
+      } else if (index > 0) {
+        inputs.current[index - 1].value = "";
+        inputs.current[index - 1].focus();
+      }
+    }
+  };
+
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
-
     try {
-      // Step 2: Verify OTP
-      const verifyRes = await fetch("http://localhost:3000/api/verify-otp", {
+      const response = await fetch("http://localhost:3000/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp: otpValue }),
       });
-      const verifyData = await verifyRes.json();
+      const result = await response.json();
 
-      if (verifyData.verified) {
-        // ✅ FIXED: Added 'mentor' to the payload below
-        const saveRes = await fetch("http://localhost:3000/api/add-problem-solver-request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            problem_id: problem_id, 
-            name: formData.name,
-            email: formData.email,
-            phone_number: formData.phone_number,
-            year: formData.year,
-            section: formData.section,
-            mentor: formData.mentor // <--- THIS WAS MISSING
-          }),
-        });
-
-        if (saveRes.ok) {
-          alert("Success! Statement locked and request submitted.");
-          navigate("/"); 
-        } else {
-          const err = await saveRes.json();
-          alert(err.message || "Failed to save request.");
-        }
+      if (result.verified) {
+        setStatus("success");
+        setTimeout(() => {
+          navigate("/add-problem", { state: { userDetails: formData } });
+        }, 2000);
       } else {
-        alert("Invalid OTP code.");
+        setStatus("error");
+        setTimeout(() => setStatus(null), 4000);
       }
     } catch (error) {
-      console.error("Submission Error:", error);
+      setStatus("error");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F9FA] flex items-center justify-center px-6 py-12 relative">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-10 border border-[#E6EFF2]">
-        <h2 className="text-2xl font-semibold text-[#023347] mb-8">Verification</h2>
-        <form onSubmit={handleVerify}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Name</label>
-              <input name="name" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Email</label>
-              <input name="email" type="email" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Mobile no.</label>
-              <input name="phone_number" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Year</label>
-              <input name="year" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Section</label>
-              <input name="section" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Mentor</label>
-              <input name="mentor" required onChange={handleInputChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
+    <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
+      
+      {/* --- NOTIFICATION TOASTS --- */}
+      <div className="fixed top-10 right-10 z-[110] flex flex-col gap-4">
+        {status === "success" && (
+          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in">
+            <div className="w-1.5 h-16 bg-[#D4AF37]" />
+            <div className="px-6 py-4 text-left">
+              <p className="text-[10px] font-bold tracking-[0.3em] text-[#D4AF37] uppercase">Identity Confirmed</p>
+              <p className="text-[13px] text-[#023347]/80 mt-1">Establishing secure session...</p>
             </div>
           </div>
-          <button type="submit" className="mt-10 w-full bg-[#0B1C3D] text-white py-3 rounded-lg font-semibold hover:bg-[#142d63] transition-all">Verify</button>
-        </form>
+        )}
+        {status === "error" && (
+          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in">
+            <div className="w-1.5 h-16 bg-[#8E2424]" />
+            <div className="px-6 py-4 text-left">
+              <p className="text-[10px] font-bold tracking-[0.3em] text-[#8E2424] uppercase">System Interruption</p>
+              <p className="text-[13px] text-[#023347]/80 mt-1">Unable to verify. Please retry.</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {showOTP && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
-          <div className="relative w-[500px] h-[360px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10">
-            <h2 className="text-xl font-semibold text-[#1C2B33] mb-8">Enter OTP</h2>
-            <div className="flex gap-4 mb-10">
-              {[...Array(6)].map((_, index) => (
-                <input key={index} maxLength="1" ref={(el) => (inputs.current[index] = el)} onChange={(e) => handleOtpChange(e, index)} className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]" />
+      {/* --- AMBIENT LIGHTING --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        
+        {/* --- HEADER --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+          <div className="flex flex-col items-start text-left">
+            <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4">Security Protocol</span>
+            <h1 className={`font-serif text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              Identity <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Verification</span>
+            </h1>
+          </div>
+          <button onClick={() => navigate(-1)} className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M5 12l7 7M5 12l7-7"/></svg>
+            Return to List
+          </button>
+        </header>
+
+        {/* --- FORM MODULE (Corporate Glass) --- */}
+        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-10 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <div className="absolute left-0 top-12 w-1 h-24 bg-[#023347]" />
+          
+          <form onSubmit={handleVerifyRequest} className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              {[
+                { label: "Full Name", name: "name", type: "text" },
+                { label: "Academic Email", name: "email", type: "email" },
+                { label: "Mobile Number", name: "phone_number", type: "text" },
+                { label: "Batch Year", name: "year", type: "text" },
+                { label: "Section", name: "section", type: "text" },
+                { label: "Mentor Name", name: "mentor", type: "text" },
+                { label: "Mentor Mail ID", name: "mentor_mail_id", type: "email", full: true }
+              ].map((field) => (
+                <div key={field.name} className={field.full ? "md:col-span-2 text-left" : "text-left"}>
+                  <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-2 block">{field.label}</label>
+                  <input 
+                    name={field.name} 
+                    type={field.type} 
+                    required 
+                    onChange={handleChange} 
+                    className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-all placeholder:text-gray-300" 
+                  />
+                </div>
               ))}
             </div>
-            <button onClick={handleSubmitOTP} className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all">Submit</button>
+
+            <div className="flex justify-end pt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#023347] text-white px-16 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 flex items-center gap-4 disabled:opacity-50"
+              >
+                {loading ? "Authenticating..." : "Request Access"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      {/* --- OTP OVERLAY --- */}
+      {showOTP && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md animate-fade-in" onClick={() => setShowOTP(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-12 shadow-2xl border border-white/20 animate-slide-up">
+            <div className="absolute left-0 top-0 w-2 h-full bg-[#023347]" />
+            <div className="text-center mb-10">
+              <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#D4AF37]">Access Gate</span>
+              <h2 className="font-serif text-3xl text-[#023347] mt-2">Enter OTP</h2>
+            </div>
+            <div className="flex justify-between gap-3 mb-10">
+              {[...Array(6)].map((_, index) => (
+                <input 
+                  key={index} maxLength="1" 
+                  ref={(el) => (inputs.current[index] = el)} 
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                  className="w-12 h-14 border border-[#023347]/10 rounded-xl text-center text-xl font-bold bg-gray-50/50 outline-none focus:border-[#D4AF37] transition-all" 
+                />
+              ))}
+            </div>
+            <div className="space-y-4">
+              <button onClick={handleSubmitOTP} className="w-full bg-[#023347] text-white py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all">Confirm</button>
+              <button onClick={() => setShowOTP(false)} className="w-full bg-transparent text-[#023347]/40 py-2 text-[10px] font-bold tracking-widest uppercase hover:text-[#023347] transition-all">Cancel</button>
+            </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .animate-slide-in { animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-up { animation: slideUp 0.5s ease-out; }
+      `}</style>
     </div>
   );
 }
