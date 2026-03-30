@@ -3,6 +3,6 @@ import { getAssociationBatchDetails } from "../controllers/associationSpecificBa
 
 const router = express.Router();
 
-router.get("/association-batch/:year", getAssociationBatchDetails);
+router.get("/association-batch/:id", getAssociationBatchDetails);
 
 export default router;

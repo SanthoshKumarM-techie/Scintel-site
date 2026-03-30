@@ -3,6 +3,7 @@ import sequelize from "../config/database.js";
 export const addAssociationMember = async (req, res) => {
   try {
     const {
+      phone_number,
       register_number,
       name,
       role,
@@ -10,13 +11,15 @@ export const addAssociationMember = async (req, res) => {
       batch_year,
     } = req.body;
 
+    const finalPhoneNumber = phone_number || register_number;
+
     // ============================
     // VALIDATION
     // ============================
 
-    if (!register_number || !name || !role || !batch_year) {
+    if (!finalPhoneNumber || !name || !role || !batch_year) {
       return res.status(400).json({
-        message: "Register number, Name, Role and Batch year are required",
+        message: "Phone number, Name, Role and Batch year are required",
       });
     }
 
@@ -27,12 +30,12 @@ export const addAssociationMember = async (req, res) => {
     await sequelize.query(
       `
       INSERT INTO association_members
-      (register_number, name, batch_year, role, year)
-      VALUES (:register_number, :name, :batch_year, :role, :year)
+      (phone_number, name, batch_year, role, year)
+      VALUES (:phone_number, :name, :batch_year, :role, :year)
       `,
       {
         replacements: {
-          register_number,
+          phone_number: finalPhoneNumber,
           name,
           batch_year,
           role,
@@ -47,15 +50,23 @@ export const addAssociationMember = async (req, res) => {
 
     return res.status(201).json({
       message: "Member added successfully",
+      data: {
+        phone_number: finalPhoneNumber,
+        register_number: finalPhoneNumber,
+        name,
+        role,
+        year: year || null,
+        batch_year,
+      },
     });
 
   } catch (error) {
     console.error("Add Member Error:", error);
 
-    // Handle duplicate register_number
+    // Handle duplicate phone_number
     if (error.name === "SequelizeUniqueConstraintError") {
       return res.status(400).json({
-        message: "Member with this register number already exists",
+        message: "Member with this phone number already exists",
       });
     }
 

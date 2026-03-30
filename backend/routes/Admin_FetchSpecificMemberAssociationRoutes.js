@@ -4,7 +4,7 @@ import { fetchSpecificMember } from "../controllers/Admin_FetchSpecificMemberAss
 const router = express.Router();
 
 router.get(
-  "/admin/association-members/:register_number",
+  "/admin/association-members/:id",
   fetchSpecificMember
 );
 

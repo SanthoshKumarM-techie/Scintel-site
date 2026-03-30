@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
+const API_BASE = "http://localhost:3000/api";
+
 export default function EditMember() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -11,6 +13,7 @@ export default function EditMember() {
   const batchYearFromState = location.state?.batch_year; // Received from EditBatch navigation
 
   const [form, setForm] = useState({
+    member_id: "",
     name: "",
     register_number: "",
     role: "",
@@ -22,8 +25,9 @@ export default function EditMember() {
   useEffect(() => {
     if (memberToEdit) {
       setForm({
+        member_id: memberToEdit.member_id || "",
         name: memberToEdit.name || "",
-        register_number: memberToEdit.register_number || "",
+        register_number: memberToEdit.register_number || memberToEdit.phone_number || "",
         role: memberToEdit.role || "",
         year: memberToEdit.year || "",
         // Use batch_year from the member object OR the secondary state passed
@@ -41,8 +45,8 @@ export default function EditMember() {
 
   const handleSave = async () => {
     // Validation: Ensure we have the critical fields
-    if (!form.register_number) {
-      alert("Register number is missing.");
+    if (!form.member_id) {
+      alert("Member id is missing.");
       return;
     }
     if (!form.batch_year) {
@@ -52,10 +56,11 @@ export default function EditMember() {
 
     setIsSaving(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/association-members/${form.register_number}`, {
+      const res = await fetch(`${API_BASE}/admin/association-members/${form.member_id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          register_number: form.register_number,
           name: form.name,
           role: form.role,
           year: form.year,
