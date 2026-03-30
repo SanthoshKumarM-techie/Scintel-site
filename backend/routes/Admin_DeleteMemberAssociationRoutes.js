@@ -4,7 +4,7 @@ import { deleteAssociationMember } from "../controllers/Admin_DeleteMemberAssoci
 const router = express.Router();
 
 router.delete(
-  "/admin/association-members/:register_number",
+  "/admin/association-members/:id",
   deleteAssociationMember
 );
 

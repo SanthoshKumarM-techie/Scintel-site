@@ -3,7 +3,7 @@ import { QueryTypes } from "sequelize";
 
 export const deleteAssociationMember = async (req, res) => {
   try {
-    const { register_number } = req.params;
+    const { id } = req.params;
 
     // ============================
     // CHECK IF MEMBER EXISTS
@@ -11,12 +11,12 @@ export const deleteAssociationMember = async (req, res) => {
 
     const [member] = await sequelize.query(
       `
-      SELECT register_number 
+      SELECT member_id
       FROM association_members
-      WHERE register_number = :register_number
+      WHERE member_id = :id
       `,
       {
-        replacements: { register_number },
+        replacements: { id },
         type: QueryTypes.SELECT,
       }
     );
@@ -34,10 +34,10 @@ export const deleteAssociationMember = async (req, res) => {
     await sequelize.query(
       `
       DELETE FROM association_members
-      WHERE register_number = :register_number
+      WHERE member_id = :id
       `,
       {
-        replacements: { register_number },
+        replacements: { id },
       }
     );
 

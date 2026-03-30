@@ -3,21 +3,23 @@ import { QueryTypes } from "sequelize";
 
 export const fetchSpecificMember = async (req, res) => {
   try {
-    const { register_number } = req.params;
+    const { id } = req.params;
 
     const [member] = await sequelize.query(
       `
       SELECT 
-        register_number,
+        member_id,
+        phone_number,
+        phone_number AS register_number,
         name,
         role,
         year,
         batch_year
       FROM association_members
-      WHERE register_number = :register_number
+      WHERE member_id = :id
       `,
       {
-        replacements: { register_number },
+        replacements: { id },
         type: QueryTypes.SELECT,
       }
     );

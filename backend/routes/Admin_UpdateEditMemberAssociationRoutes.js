@@ -4,7 +4,7 @@ import { updateAssociationMember } from "../controllers/Admin_UpdateEditMemberAs
 const router = express.Router();
 
 router.put(
-  "/admin/association-members/:register_number",
+  "/admin/association-members/:id",
   updateAssociationMember
 );
 

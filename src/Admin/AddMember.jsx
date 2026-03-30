@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
+const API_BASE = "http://localhost:3000/api";
+
 export default function AddMember() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,7 +32,7 @@ export default function AddMember() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("http://localhost:3000/api/admin/association-members", {
+      const res = await fetch(`${API_BASE}/admin/association-members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

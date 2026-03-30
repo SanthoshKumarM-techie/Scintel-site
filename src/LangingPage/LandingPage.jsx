@@ -149,6 +149,7 @@ return (
 
 <Route path="/activities" element={<ActPage />} />
 <Route path="/members" element={<AssociationMembers />} />
+<Route path="/members/:batchYear" element={<AssociationMembers />} />
 <Route path="/problems" element={<ProblemStatements />} />
 <Route path="/suggestions" element={<Suggestions />} />
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // ← added useNavigate
 
 const EventDetails = () => {
@@ -26,12 +26,13 @@ const EventDetails = () => {
   }, [id]);
 
   useEffect(() => {
+    const currentSection = sectionRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+    if (currentSection) observer.observe(currentSection);
+    return () => { if (currentSection) observer.unobserve(currentSection); };
   }, []);
 
   if (loading) return (

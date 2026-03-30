@@ -42,6 +42,8 @@ export const deleteSpecificBatch = async (req, res) => {
       });
     }
 
+    const transaction = await sequelize.transaction();
+
     // ============================
     // DELETE IMAGE (Cloudinary)
     // ============================
@@ -66,15 +68,34 @@ export const deleteSpecificBatch = async (req, res) => {
     // DELETE FROM DB
     // ============================
 
-    await sequelize.query(
-      `
-      DELETE FROM association_batch
-      WHERE batch_id = :id
-      `,
-      {
-        replacements: { id },
-      }
-    );
+    try {
+      await sequelize.query(
+        `
+        DELETE FROM association_members
+        WHERE batch_year = :batch_year
+        `,
+        {
+          replacements: { batch_year: batch.batch_year },
+          transaction,
+        }
+      );
+
+      await sequelize.query(
+        `
+        DELETE FROM association_batch
+        WHERE batch_id = :id
+        `,
+        {
+          replacements: { id },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+    } catch (dbError) {
+      await transaction.rollback();
+      throw dbError;
+    }
 
     // ============================
     // RESPONSE

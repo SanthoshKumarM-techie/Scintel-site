@@ -2,22 +2,26 @@ import sequelize from "../config/database.js";
 
 export const updateAssociationMember = async (req, res) => {
   try {
-    const { register_number } = req.params;
+    const { id } = req.params;
 
     const {
+      phone_number,
+      register_number,
       name,
       role,
       year,
       batch_year,
     } = req.body;
 
+    const finalPhoneNumber = phone_number || register_number;
+
     // ============================
     // VALIDATION
     // ============================
 
-    if (!name || !role || !batch_year) {
+    if (!finalPhoneNumber || !name || !role || !batch_year) {
       return res.status(400).json({
-        message: "Name, Role and Batch year are required",
+        message: "Phone number, Name, Role and Batch year are required",
       });
     }
 
@@ -27,12 +31,12 @@ export const updateAssociationMember = async (req, res) => {
 
     const [existing] = await sequelize.query(
       `
-      SELECT register_number 
+      SELECT member_id
       FROM association_members
-      WHERE register_number = :register_number
+      WHERE member_id = :id
       `,
       {
-        replacements: { register_number },
+        replacements: { id },
       }
     );
 
@@ -49,15 +53,17 @@ export const updateAssociationMember = async (req, res) => {
     await sequelize.query(
       `
       UPDATE association_members SET
+        phone_number = :phone_number,
         name = :name,
         role = :role,
         year = :year,
         batch_year = :batch_year
-      WHERE register_number = :register_number
+      WHERE member_id = :id
       `,
       {
         replacements: {
-          register_number,
+          id,
+          phone_number: finalPhoneNumber,
           name,
           role,
           year: year || null,
@@ -72,6 +78,15 @@ export const updateAssociationMember = async (req, res) => {
 
     return res.status(200).json({
       message: "Member updated successfully",
+      data: {
+        member_id: Number(id),
+        phone_number: finalPhoneNumber,
+        register_number: finalPhoneNumber,
+        name,
+        role,
+        year: year || null,
+        batch_year,
+      },
     });
 
   } catch (error) {

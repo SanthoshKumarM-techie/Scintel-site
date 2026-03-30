@@ -236,6 +236,7 @@ const AnnouncementAdmin = () => {
   };
 
   useEffect(() => {
+    const currentSection = sectionRef.current;
     fetchAnnouncements();
     const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setIsVisible(true); }, { threshold: 0.1 });
     if (sectionRef.current) observer.observe(sectionRef.current);
