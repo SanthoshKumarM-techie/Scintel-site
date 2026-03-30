@@ -236,7 +236,7 @@ const ProblemAdmin = () => {
                 ) : (
                   <>
                     {activeTab === 'Problems List' && problemData.map((row) => (
-                      <tr key={row.problem_id} className="hover:bg-gray-50">
+                      <tr key={row.problem_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center">
                           <span className={`px-4 py-1.5 rounded-full text-xs font-semibold ${row.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
@@ -244,25 +244,25 @@ const ProblemAdmin = () => {
                           </span>
                         </td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_id, 'problem')} className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm">View Details</button>
+                          <button onClick={() => handleViewDetail(row.problem_id, 'problem')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">View Details</button>
                         </td>
                       </tr>
                     ))}
                     {activeTab === 'Problem Request' && requestData.map((row) => (
-                      <tr key={row.problem_creation_request_id} className="hover:bg-gray-50">
+                     <tr key={row.problem_creation_request_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')} className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm">Review Request</button>
+                          <button onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">Review Request</button>
                         </td>
                       </tr>
                     ))}
                     {activeTab === 'Lock Request' && lockRequestData.map((row) => (
-                      <tr key={row.problem_solver_request_id} className="hover:bg-gray-50">
+                      <tr key={row.problem_solver_request_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')} className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm">Review Solver</button>
+                          <button onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">Review Solver</button>
                         </td>
                       </tr>
                     ))}

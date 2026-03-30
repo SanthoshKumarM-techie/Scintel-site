@@ -285,29 +285,30 @@ export default function SuggestionAdmin() {
         {view === "list" || view === "history" ? (
           <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
-            {/* Header row */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
-              <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
-                {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
-              </h1>
-              <div style={{ display: "flex", gap: "12px" }}>
-                <button
-                  onClick={() => setView(view === "list" ? "history" : "list")}
-                  style={{ ...btnBase }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
-                >
-                  {view === "list" ? "View History" : "← Dashboard"}
-                </button>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "250px" }}
-                />
-              </div>
-            </div>
+           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
+  <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
+    {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
+  </h1>
+  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+    <input
+      type="text"
+      placeholder="Search..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "220px", height: "44px", boxSizing: "border-box", transition: "border-color 0.2s" }}
+onFocus={e => e.currentTarget.style.borderColor = "#2A8E9E"}
+onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
+    />
+    <button
+      onClick={() => setView(view === "list" ? "history" : "list")}
+      style={{ ...btnBase, whiteSpace: "nowrap" }}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+    >
+      {view === "list" ? "View History" : "← Dashboard"}
+    </button>
+  </div>
+</div>
 
             {/* Tabs */}
             <div style={{ display: "flex", gap: "28px", borderBottom: "2px solid #eee", marginBottom: "20px", flexShrink: 0 }}>
@@ -357,19 +358,26 @@ export default function SuggestionAdmin() {
                     ) : (view === "list" ? suggestionList : historyList)
                       .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
                       .map((item) => (
-                        <tr key={item.suggestion_id || item.record_id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
-                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
-                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
-                          <td style={{ padding: "16px", textAlign: "center" }}>
-                            <button
-                              onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
-                              style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
+                       <tr
+  key={item.suggestion_id || item.record_id}
+  style={{ borderBottom: "1px solid #f1f5f9", transition: "background-color 0.2s" }}
+  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f4fafb"}
+  onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+>
+  <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
+  <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
+  <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
+  <td style={{ padding: "16px", textAlign: "center" }}>
+    <button
+      onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
+      style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "background-color 0.2s" }}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+    >
+      View
+    </button>
+  </td>
+</tr>
                       ))}
                   </tbody>
                 </table>

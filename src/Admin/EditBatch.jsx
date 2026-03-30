@@ -20,6 +20,10 @@ export default function EditBatch() {
   const [originalMembers, setOriginalMembers] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ── Modal State ──
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [memberForm, setMemberForm] = useState({ name: "", reg: "", role: "", year: "" });
+
   useEffect(() => {
     const data = location.state?.batch;
     if (data && data.batch_info) {
@@ -137,11 +141,22 @@ export default function EditBatch() {
     setMembers(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddMember = () => {
-    setMembers(prev => [
-      ...prev,
-      { member_id: null, name: "", register_number: "", role: "", year: "", batch_year: batchYear }
-    ]);
+  // ── Opens modal instead of inline row ──
+  const handleAddMemberSubmit = () => {
+    if (!memberForm.name.trim() || !memberForm.reg.trim()) {
+      alert("Name and Register Number are required.");
+      return;
+    }
+    setMembers(prev => [...prev, {
+      member_id: null,
+      name: memberForm.name,
+      register_number: memberForm.reg,
+      role: memberForm.role,
+      year: memberForm.year,
+      batch_year: batchYear
+    }]);
+    setMemberForm({ name: "", reg: "", role: "", year: "" });
+    setShowAddModal(false);
   };
 
   return (
@@ -158,32 +173,32 @@ export default function EditBatch() {
 
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>
 
-        {/* Header: title left, Add Member right */}
+        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#083A4B", margin: 0 }}>Edit Batch</h2>
           <button
-            onClick={handleAddMember}
+            onClick={() => setShowAddModal(true)}
             className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
           >
             + Add Member
           </button>
         </div>
 
-        {/* Batch Info: image left, form fields right */}
+        {/* Batch Info */}
         <div style={{ display: "flex", gap: "28px", alignItems: "flex-start", marginBottom: "32px", flexWrap: "wrap" }}>
           <div style={{ width: "320px", flexShrink: 0 }}>
             <div style={{ width: "100%", height: "180px", background: "#0d2233", borderRadius: "10px", overflow: "hidden" }}>
-              <img 
-                src={previewUrl || "https://placehold.jp/320x180.png"} 
-                alt="Preview" 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              <img
+                src={previewUrl || "https://placehold.jp/320x180.png"}
+                alt="Preview"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </div>
             <input type="file" ref={fileInputRef} hidden onChange={(e) => {
               const file = e.target.files[0];
               if (file) { setNewImageFile(file); setPreviewUrl(URL.createObjectURL(file)); }
             }} />
-            <button 
+            <button
               onClick={() => fileInputRef.current.click()}
               style={{ marginTop: "10px", width: "100%", padding: "9px", cursor: "pointer", background: "#f8f9fa", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 500 }}
             >
@@ -208,7 +223,7 @@ export default function EditBatch() {
           </div>
         </div>
 
-        {/* Members Table — inner scrollable */}
+        {/* Members Table */}
         <div className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden" style={{ maxHeight: "420px", display: "flex", flexDirection: "column" }}>
           <div className="overflow-y-auto eb-scrollbar overflow-x-auto">
             <table className="w-full text-left border-collapse" style={{ minWidth: "700px" }}>
@@ -223,7 +238,7 @@ export default function EditBatch() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {members.length > 0 ? members.map((m, index) => (
-                  <tr key={m.member_id || `new-${index}`} className="hover:bg-gray-50">
+                  <tr key={m.member_id || `new-${index}`} className="hover:bg-[#f4fafb] transition-colors duration-200">
                     <td className="px-6 py-4 text-center">
                       <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(u); }} />
                     </td>
@@ -255,7 +270,7 @@ export default function EditBatch() {
           </div>
         </div>
 
-        {/* Footer buttons */}
+        {/* Footer Buttons */}
         <div style={{ marginTop: "28px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
           <button
             onClick={() => navigate(-1)}
@@ -272,6 +287,54 @@ export default function EditBatch() {
           </button>
         </div>
       </div>
+
+      {/* ── Add Member Modal ── */}
+      {showAddModal && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "0 16px" }}
+          onClick={() => setShowAddModal(false)}
+        >
+          <div
+            style={{ background: "#fff", borderRadius: 14, padding: 32, width: "100%", maxWidth: 480, boxSizing: "border-box" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: "#111827", marginBottom: 20 }}>Add Member</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+              {[
+                { label: "Name", key: "name", placeholder: "Full name" },
+                { label: "Register Number", key: "reg", placeholder: "611..." },
+                { label: "Role", key: "role", placeholder: "Secretary" },
+                { label: "Year", key: "year", placeholder: "4" },
+              ].map(({ label, key, placeholder }) => (
+                <div key={key}>
+                  <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>{label}</label>
+                  <input
+                    type="text"
+                    placeholder={placeholder}
+                    className="eb-input"
+                    value={memberForm[key]}
+                    onChange={(e) => setMemberForm(prev => ({ ...prev, [key]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button
+                onClick={() => { setShowAddModal(false); setMemberForm({ name: "", reg: "", role: "", year: "" }); }}
+                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddMemberSubmit}
+                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+              >
+                Add to List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminSidebar>
   );
 }

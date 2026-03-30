@@ -119,7 +119,7 @@ export default function AddBatch() {
   };
   const labelStyle = { display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 };
   const btnPrimary = {
-    background: "#083A4B", color: "#fff", padding: "9px 24px",
+    background: "#023347", color: "#fff", padding: "9px 24px",
     borderRadius: 8, border: "none", fontWeight: 600,
     fontSize: 14, cursor: "pointer", fontFamily: "inherit",
     opacity: loading ? 0.7 : 1
@@ -141,12 +141,36 @@ export default function AddBatch() {
         .ab-table thead { background: #3DA6B6; color: #fff; }
         .ab-table th, .ab-table td { padding: 16px; text-align: left; font-size: 14px; }
         .ab-table td { color: #6b7280; border-top: 1px solid #f3f4f6; }
+        .ab-input { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; color: #111827; transition: border-color 0.2s, box-shadow 0.2s; }
+        .ab-input:focus { border-color: #2A8E9E; box-shadow: 0 0 0 3px rgba(42,142,158,0.18); }
+
         .ab-btn-row { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
         .ab-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 0 16px; }
         .ab-modal { background: #fff; border-radius: 14px; padding: 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
         .ab-modal h3 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 20px; }
         .ab-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
         .ab-modal-btns { display: flex; justify-content: flex-end; gap: 12px; }
+        .ab-btn-save {
+          height: 44px; padding: 0 32px; background: #023347; color: #fff;
+          border-radius: 12px; border: none; font-weight: 600; font-size: 14px;
+          cursor: pointer; font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          transition: all 0.2s; transform: translateY(0);
+        }
+        .ab-btn-save:hover:not(:disabled) { background: #2A8E9E; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transform: translateY(-2px); }
+        .ab-btn-cancel {
+          height: 44px; padding: 0 32px; background: #023347; color: #fff;
+          border-radius: 12px; border: none; font-weight: 600; font-size: 14px;
+          cursor: pointer; font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          transition: all 0.2s; transform: translateY(0);
+        }
+        .ab-btn-cancel:hover:not(:disabled) { background: #b91c1c; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transform: translateY(-2px); }
+        .ab-btn-add-member {
+          height: 36px; padding: 0 16px; background: #023347; color: #fff;
+          border-radius: 10px; border: none; font-weight: 600; font-size: 13px;
+          cursor: pointer; font-family: inherit; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          transition: all 0.2s;
+        }
+        .ab-btn-add-member:hover { background: #2A8E9E; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(-1px); }
         @media (max-width: 768px) {
           .ab-top-form { flex-direction: column; gap: 20px; }
           .ab-upload-box { width: 100%; min-width: unset; height: 180px; }
@@ -186,7 +210,7 @@ export default function AddBatch() {
               <label style={labelStyle}>Batch Year (e.g. 2023)</label>
               <input
                 type="text"
-                style={inputStyle}
+                className="ab-input"
                 value={batchYear}
                 onChange={(e) => setBatchYear(e.target.value)}
                 placeholder="2023"
@@ -196,7 +220,7 @@ export default function AddBatch() {
               <label style={labelStyle}>Batch Title</label>
               <input
                 type="text"
-                style={inputStyle}
+                className="ab-input"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Scintel 2023"
@@ -206,7 +230,8 @@ export default function AddBatch() {
               <label style={labelStyle}>Description</label>
               <textarea
                 rows="3"
-                style={{ ...inputStyle, resize: "none" }}
+                className="ab-input"
+                style={{ resize: "none" }}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Brief description of this batch..."
@@ -220,7 +245,7 @@ export default function AddBatch() {
           <span style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Members</span>
           <button
             onClick={() => setShowAddModal(true)}
-            style={{ ...btnPrimary, padding: "7px 16px", fontSize: 13 }}
+            className="ab-btn-add-member"
           >
             + Add Member
           </button>
@@ -269,15 +294,15 @@ export default function AddBatch() {
 
         {/* Footer Buttons */}
         <div className="ab-btn-row">
-          <button 
-            style={{ ...btnPrimary, background: "#fff", color: "#374151", border: "1px solid #d1d5db" }} 
+          <button
+            className="ab-btn-cancel"
             onClick={() => navigate(-1)}
             disabled={loading}
           >
             Cancel
           </button>
-          <button 
-            style={btnPrimary} 
+          <button
+            className="ab-btn-save"
             onClick={handleSave}
             disabled={loading}
           >
@@ -303,7 +328,7 @@ export default function AddBatch() {
                   <input
                     type="text"
                     placeholder={placeholder}
-                    style={inputStyle}
+                    className="ab-input"
                     value={memberForm[key]}
                     onChange={(e) => setMemberForm((prev) => ({ ...prev, [key]: e.target.value }))}
                   />
@@ -311,8 +336,8 @@ export default function AddBatch() {
               ))}
             </div>
             <div className="ab-modal-btns">
-              <button onClick={() => setShowAddModal(false)} style={{ ...btnPrimary, background: "#f1f5f9", color: "#374151" }}>Cancel</button>
-              <button style={btnPrimary} onClick={handleAddMember}>Add to List</button>
+              <button onClick={() => setShowAddModal(false)} className="ab-btn-cancel">Cancel</button>
+              <button onClick={handleAddMember} className="ab-btn-save">Add to List</button>
             </div>
           </div>
         </div>
