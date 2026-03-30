@@ -71,7 +71,7 @@ export default function SuggestionAdmin() {
       setSelectedItem(result.data);
       setPrevView(source);
       setView("detail");
-    } catch (error) {
+    } catch {
       alert("Error fetching details");
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export default function SuggestionAdmin() {
         setView("list");
         setDashboardTab("acknowledged");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to acknowledge");
     } finally {
       setActionLoading(false);
@@ -107,7 +107,7 @@ export default function SuggestionAdmin() {
         setView("history");
         setHistoryTab("resolved");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to resolve");
     } finally {
       setActionLoading(false);
@@ -133,7 +133,7 @@ export default function SuggestionAdmin() {
         setView("history");
         setHistoryTab("rejected");
       }
-    } catch (error) {
+    } catch {
       alert("Error processing rejection");
     } finally {
       setActionLoading(false);

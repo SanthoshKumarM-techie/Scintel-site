@@ -1,51 +1,104 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
+const API_BASE = "http://localhost:3000/api";
+
 export default function AdminMembers() {
   const navigate = useNavigate();
-  
   const [batches, setBatches] = useState([]);
-  const [selectedBatchYear, setSelectedBatchYear] = useState(""); 
+  const [selectedBatchId, setSelectedBatchId] = useState("");
   const [batchDetails, setBatchDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+
+  const selectedBatch = useMemo(
+    () => batches.find((batch) => String(batch.batch_id) === String(selectedBatchId)) || null,
+    [batches, selectedBatchId]
+  );
 
   const fetchBatches = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/association-batches");
-      const data = await res.json();
-      setBatches(data);
-      if (data.length > 0 && !selectedBatchYear) {
-        // Default to the first batch in the list
-        setSelectedBatchYear(data[0].batch_year);
-      }
-    } catch (err) {
-      console.error("Error fetching batches:", err);
+    const res = await fetch(`${API_BASE}/association-batches`);
+    if (!res.ok) {
+      throw new Error("Failed to fetch association batches");
     }
+
+    const data = await res.json();
+    setBatches(Array.isArray(data) ? data : []);
+
+    if (!data.length) {
+      setSelectedBatchId("");
+      setBatchDetails(null);
+      setLoading(false);
+      return;
+    }
+
+    setSelectedBatchId((current) => {
+      if (current && data.some((batch) => String(batch.batch_id) === String(current))) {
+        return current;
+      }
+      return String(data[0].batch_id);
+    });
   };
 
-  const fetchBatchDetails = async (year) => {
+  const fetchBatchDetails = async (batchId) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/association-batch/${year}`);
+      const res = await fetch(`${API_BASE}/association-batch/${batchId}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch batch details");
+      }
       const data = await res.json();
       setBatchDetails(data);
-    } catch (err) {
-      console.error("Error fetching batch details:", err);
+    } catch (error) {
+      console.error("Error fetching batch details:", error);
+      setBatchDetails(null);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDeleteBatch = async () => {
+    if (!selectedBatch || deleting) {
+      return;
+    }
+
+    if (!window.confirm(`Remove batch ${selectedBatch.batch_year}?`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/association-batch/${selectedBatch.batch_id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to remove batch");
+      }
+
+      await fetchBatches();
+    } catch (error) {
+      console.error("Error deleting batch:", error);
+      alert(error.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   useEffect(() => {
-    fetchBatches();
+    fetchBatches().catch((error) => {
+      console.error("Error fetching batches:", error);
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
-    if (selectedBatchYear) {
-      fetchBatchDetails(selectedBatchYear);
+    if (selectedBatchId) {
+      fetchBatchDetails(selectedBatchId);
     }
-  }, [selectedBatchYear]);
+  }, [selectedBatchId]);
 
   return (
     <AdminSidebar>
@@ -78,17 +131,19 @@ export default function AdminMembers() {
           <div className="am-header-btns" style={{ display: "flex", gap: "12px" }}>
             {/* Remove Batch — Delete style */}
             <button
-              onClick={() => { if(window.confirm(`Remove batch ${selectedBatchYear}?`)) {} }}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl  text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+              onClick={handleDeleteBatch}
+              disabled={!selectedBatch || deleting}
+              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Remove Batch
+              {deleting ? "Removing..." : "Remove Batch"}
             </button>
             {/* Edit — Edit style */}
             <button
-              onClick={() => navigate("/admin/edit-batch", { state: { batch: batchDetails } })}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+              onClick={() => batchDetails && navigate("/admin/edit-batch", { state: { batch: batchDetails } })}
+              disabled={!batchDetails}
+              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Edit
+              Edit Batch
             </button>
             {/* Add Batch — Edit style */}
             <button
@@ -104,9 +159,9 @@ export default function AdminMembers() {
         <div className="am-tabs">
           {batches.map((b) => (
             <span
-              key={b.batch_year}
-              onClick={() => setSelectedBatchYear(b.batch_year)}
-              className={`am-tab ${selectedBatchYear === b.batch_year ? "active" : ""}`}
+              key={b.batch_id}
+              onClick={() => setSelectedBatchId(String(b.batch_id))}
+              className={`am-tab ${String(selectedBatchId) === String(b.batch_id) ? "active" : ""}`}
             >
               {b.batch_year}
             </span>
@@ -122,10 +177,13 @@ export default function AdminMembers() {
               <img
                 src={batchDetails.batch_info.image_url || "https://via.placeholder.com/384x216"}
                 className="am-batch-img"
-                alt="batch"
+                alt={batchDetails.batch_info.title || "batch"}
                 style={{ width: "384px", minWidth: "384px", height: "216px", borderRadius: "12px", objectFit: "cover", background: "#e5e7eb", flexShrink: 0 }}
               />
               <div style={{ paddingTop: "8px" }}>
+                <div style={{ color: "#2A8E9E", fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>
+                  Batch {batchDetails.batch_info.batch_year}
+                </div>
                 <h3 style={{ fontSize: "17px", fontWeight: 600, marginBottom: "8px", color: "#111827" }}>
                   {batchDetails.batch_info.title}
                 </h3>
@@ -142,7 +200,7 @@ export default function AdminMembers() {
                   <thead className="bg-[#2A8E9E] sticky top-0 z-10">
                     <tr className="text-white">
                       <th className="px-6 py-4 font-semibold text-center">Name</th>
-                      <th className="px-6 py-4 font-semibold text-center">Register no.</th>
+                      <th className="px-6 py-4 font-semibold text-center">Phone no.</th>
                       <th className="px-6 py-4 font-semibold text-center">Role</th>
                       <th className="px-6 py-4 font-semibold text-center">Year</th>
                     </tr>
@@ -150,9 +208,9 @@ export default function AdminMembers() {
                   <tbody className="divide-y divide-gray-100">
                     {batchDetails.members.length > 0 ? (
                       batchDetails.members.map((member) => (
-                        <tr key={member.register_number} className="hover:bg-gray-50">
+                        <tr key={member.member_id} className="hover:bg-gray-50">
                           <td className="px-6 py-5 text-[#023347] font-bold text-center">{member.name}</td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.register_number}</td>
+                          <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.register_number || member.phone_number}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.role}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.year}</td>
                         </tr>
@@ -170,10 +228,10 @@ export default function AdminMembers() {
             {/* Mobile Cards */}
             <div className="am-cards">
               {batchDetails.members.map((member) => (
-                <div key={member.register_number} className="am-card">
+                <div key={member.member_id} className="am-card">
                   <div className="am-card-name">{member.name}</div>
-                  <div className="am-card-row"><span>Reg: {member.register_number}</span><span>Yr: {member.year}</span></div>
-                  <div className="am-card-row" style={{ color: '#083A4B', fontWeight: 500 }}>{member.role}</div>
+                  <div className="am-card-row"><span>Reg: {member.register_number || member.phone_number}</span><span>Yr: {member.year}</span></div>
+                  <div className="am-card-row" style={{ color: "#083A4B", fontWeight: 500 }}>{member.role}</div>
                 </div>
               ))}
             </div>

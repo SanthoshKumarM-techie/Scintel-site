@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
+const API_BASE = "http://localhost:3000/api";
+
 export default function EditBatch() {
   const navigate = useNavigate();
   const location = useLocation();
   const fileInputRef = useRef(null);
 
-  const [originalYear, setOriginalYear] = useState(""); 
+  const [batchId, setBatchId] = useState("");
   const [batchYear, setBatchYear] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -15,20 +17,29 @@ export default function EditBatch() {
   const [newImageFile, setNewImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [members, setMembers] = useState([]);
+  const [originalMembers, setOriginalMembers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null);
 
   useEffect(() => {
     const data = location.state?.batch;
     if (data && data.batch_info) {
       const info = data.batch_info;
-      setOriginalYear(info.batch_year); 
+      const normalizedMembers = (data.members || []).map((member) => ({
+        member_id: member.member_id ?? null,
+        name: member.name || "",
+        register_number: member.register_number || member.phone_number || "",
+        role: member.role || "",
+        year: member.year || "",
+        batch_year: member.batch_year || info.batch_year || "",
+      }));
+      setBatchId(String(info.batch_id || ""));
       setBatchYear(info.batch_year);
       setTitle(info.title || "");
       setDescription(info.description || "");
       setExistingImageUrl(info.image_url || "");
       setPreviewUrl(info.image_url || "");
-      setMembers(data.members || []); 
+      setMembers(normalizedMembers);
+      setOriginalMembers(normalizedMembers);
     } else {
       console.warn("No batch data found in state. Redirecting...");
       navigate("/admin/members");
@@ -36,33 +47,81 @@ export default function EditBatch() {
   }, [location, navigate]);
 
   const handleSaveAll = async () => {
-    if (!batchYear || !title) {
-      alert("Batch Year and Title are required.");
+    if (!batchId || !batchYear.trim() || !title.trim() || !description.trim()) {
+      alert("Batch year, title and description are required.");
       return;
     }
+
+    const hasInvalidMember = members.some(
+      (member) => !member.name.trim() || !member.register_number.trim() || !member.role.trim()
+    );
+
+    if (hasInvalidMember) {
+      alert("Each member needs a name, register number and role.");
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("batch_year", batchYear);
-      formData.append("title", title);
-      formData.append("description", description);
+      formData.append("batch_year", batchYear.trim());
+      formData.append("title", title.trim());
+      formData.append("description", description.trim());
       formData.append("existing_image_url", existingImageUrl);
       if (newImageFile) formData.append("image", newImageFile);
 
-      const batchRes = await fetch(`http://localhost:3000/api/admin/association-batch/${originalYear}`, {
+      const batchRes = await fetch(`${API_BASE}/admin/association-batch/${batchId}`, {
         method: "PUT",
         body: formData,
       });
-      if (!batchRes.ok) throw new Error("Failed to update batch info");
+      const batchData = await batchRes.json().catch(() => ({}));
+      if (!batchRes.ok) throw new Error(batchData.message || "Failed to update batch info");
 
-      const memberPromises = members.map(m => 
-        fetch(`http://localhost:3000/api/admin/association-members/${m.register_number}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: m.name, role: m.role, year: m.year, batch_year: batchYear })
+      const removedMembers = originalMembers.filter(
+        (originalMember) =>
+          originalMember.member_id &&
+          !members.some((member) => String(member.member_id) === String(originalMember.member_id))
+      );
+
+      await Promise.all(
+        removedMembers.map(async (member) => {
+          const response = await fetch(`${API_BASE}/admin/association-members/${member.member_id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to delete member ${member.name}`);
+          }
         })
       );
-      await Promise.all(memberPromises);
+
+      await Promise.all(
+        members.map(async (member) => {
+          const payload = {
+            name: member.name.trim(),
+            register_number: member.register_number.trim(),
+            role: member.role.trim(),
+            year: member.year?.trim() || "",
+            batch_year: batchYear.trim(),
+          };
+
+          const response = await fetch(
+            member.member_id
+              ? `${API_BASE}/admin/association-members/${member.member_id}`
+              : `${API_BASE}/admin/association-members`,
+            {
+              method: member.member_id ? "PUT" : "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to save member ${member.name}`);
+          }
+        })
+      );
 
       alert("Batch and members updated successfully!");
       navigate("/admin/members");
@@ -79,8 +138,10 @@ export default function EditBatch() {
   };
 
   const handleAddMember = () => {
-    setMembers(prev => [...prev, { name: "", register_number: "", role: "", year: "" }]);
-    setEditingIndex(members.length);
+    setMembers(prev => [
+      ...prev,
+      { member_id: null, name: "", register_number: "", role: "", year: "", batch_year: batchYear }
+    ]);
   };
 
   return (
@@ -154,7 +215,7 @@ export default function EditBatch() {
               <thead className="bg-[#2A8E9E] sticky top-0 z-10">
                 <tr className="text-white">
                   <th className="px-6 py-4 font-semibold text-center">Name</th>
-                  <th className="px-6 py-4 font-semibold text-center">Register no.</th>
+                  <th className="px-6 py-4 font-semibold text-center">Phone no.</th>
                   <th className="px-6 py-4 font-semibold text-center">Role</th>
                   <th className="px-6 py-4 font-semibold text-center">Year</th>
                   <th className="px-6 py-4 font-semibold text-center">Action</th>
@@ -162,51 +223,26 @@ export default function EditBatch() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {members.length > 0 ? members.map((m, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr key={m.member_id || `new-${index}`} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-center">
-                      {editingIndex === index
-                        ? <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(u); }} />
-                        : <span className="text-[#023347] font-semibold text-sm">{m.name}</span>}
+                      <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(u); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {editingIndex === index
-                        ? <input className="eb-input" value={m.register_number} onChange={e => { const u = [...members]; u[index].register_number = e.target.value; setMembers(u); }} />
-                        : <span className="text-gray-600 text-sm">{m.register_number}</span>}
+                      <input className="eb-input" value={m.register_number} onChange={e => { const u = [...members]; u[index].register_number = e.target.value; setMembers(u); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {editingIndex === index
-                        ? <input className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(u); }} />
-                        : <span className="text-gray-600 text-sm">{m.role}</span>}
+                      <input className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(u); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {editingIndex === index
-                        ? <input className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(u); }} />
-                        : <span className="text-gray-600 text-sm">{m.year}</span>}
+                      <input className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(u); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-3">
-                        {editingIndex === index ? (
-                          <button
-                            onClick={() => setEditingIndex(null)}
-                            className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-                          >
-                            Save
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => setEditingIndex(index)}
-                            className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-                          >
-                            Edit
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleRemoveMember(index)}
-                          className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleRemoveMember(index)}
+                        className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
                 )) : (

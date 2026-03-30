@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+const API_BASE = "http://localhost:3000/api";
 
 export default function AssociationMembers() {
   const navigate = useNavigate();
+  const { batchYear } = useParams();
 
   // --- STATE FOR BACKEND DATA ---
   const [batches, setBatches] = useState([]);
@@ -19,16 +22,25 @@ export default function AssociationMembers() {
   useEffect(() => {
     const fetchBatches = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/association-batches");
+        const response = await fetch(`${API_BASE}/association-batches`);
         const data = await response.json();
         setBatches(data);
-        if (data.length > 0) setActiveTab(data[0].batch_year);
+        if (data.length === 0) {
+          setActiveTab("");
+          return;
+        }
+
+        const matchedBatch = batchYear
+          ? data.find((batch) => String(batch.batch_year) === String(batchYear))
+          : null;
+
+        setActiveTab(matchedBatch ? matchedBatch.batch_year : data[0].batch_year);
       } catch (error) {
         console.error("Error fetching batches:", error);
       }
     };
     fetchBatches();
-  }, []);
+  }, [batchYear]);
 
   // 2. FETCH SPECIFIC BATCH DETAILS
   useEffect(() => {
@@ -36,7 +48,7 @@ export default function AssociationMembers() {
       if (!activeTab) return;
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:3000/api/association-batch/${activeTab}`);
+        const response = await fetch(`${API_BASE}/association-batch/${encodeURIComponent(activeTab)}`);
         const data = await response.json();
         setBatchDetails(data);
       } catch (error) {
@@ -48,14 +60,22 @@ export default function AssociationMembers() {
     fetchMembers();
   }, [activeTab]);
 
+  useEffect(() => {
+    if (!activeTab) return;
+    if (String(batchYear || "") !== String(activeTab)) {
+      navigate(`/members/${encodeURIComponent(activeTab)}`, { replace: true });
+    }
+  }, [activeTab, batchYear, navigate]);
+
   // 3. ANIMATION OBSERVER
   useEffect(() => {
+    const currentSection = sectionRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
       { threshold: 0.1 }
     );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+    if (currentSection) observer.observe(currentSection);
+    return () => { if (currentSection) observer.unobserve(currentSection); };
   }, []);
 
   return (
@@ -100,8 +120,8 @@ export default function AssociationMembers() {
               <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-12' : 'w-0'}`} />
             </div>
             
-            <h1 className={`text-4xl md:text-6xl font-semibold font-serif text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
-              Association <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Roll</span>
+            <h1 className={`text-4xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+              Association <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Members</span>
             </h1>
           </div>
 
@@ -123,7 +143,7 @@ export default function AssociationMembers() {
               <img
                 src={batchDetails.batch_info.image_url || "https://via.placeholder.com/600x400"}
                 alt="Batch"
-                onClick={() => setSelectedImage(batchDetails.batch_info.image_url)}
+                onClick={() => batchDetails.batch_info.image_url && setSelectedImage(batchDetails.batch_info.image_url)}
                 className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
               />
             </div>
@@ -158,7 +178,7 @@ export default function AssociationMembers() {
           <div className="hidden md:grid grid-cols-12 gap-4 px-10 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#023347]/40">
             <div className="col-span-1">No.</div>
             <div className="col-span-5">Member Name</div>
-            <div className="col-span-3">Register Number</div>
+            <div className="col-span-3">Phone Number</div>
             <div className="col-span-3 text-right">Designation</div>
           </div>
 
@@ -185,7 +205,7 @@ export default function AssociationMembers() {
 
               <div className="col-span-3">
                 <span className="text-[11px] font-medium text-[#023347]/50 tracking-wider">
-                  {member.register_number}
+                  {member.register_number || member.phone_number}
                 </span>
               </div>
 

@@ -5,7 +5,7 @@ export const getAllAssociationBatches = async (req, res) => {
     try {
 
         const [results] = await sequelize.query(`
-            SELECT batch_year, title
+            SELECT batch_id, batch_year, title, description, image_url
             FROM association_batch
             ORDER BY batch_year DESC
         `);

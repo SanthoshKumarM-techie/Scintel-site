@@ -88,11 +88,11 @@ function Home() {
           <div className="mb-20">
              <div className="flex items-center gap-4 mb-6">
                 <span className="text-[10px] font-black tracking-[0.5em] uppercase text-[#D4AF37] font-sans">Institutional Pillars</span>
-                <div className="h-[1px] w-24 bg-[#D4AF37]/30" />
+               
              </div>
              {/* Section Header (Serif) */}
-             <h2 className="font-serif text-4xl md:text-5xl font-semibold text-[#023347] tracking-tight">
-               Our Strategic <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Objectives</span>
+             <h2 className="text-4xl md:text-5xl font-semibold text-[#023347] tracking-tight">
+               Our <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Objectives</span>
              </h2>
           </div>
 

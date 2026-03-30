@@ -3,9 +3,9 @@ import sequelize from "../config/database.js";
 
 const AssociationMember = sequelize.define("AssociationMember", {
 
-  register_number: {
+  phone_number: {
     type: DataTypes.STRING,
-    primaryKey: true
+    allowNull: false
   },
 
   name: {
@@ -23,10 +23,15 @@ const AssociationMember = sequelize.define("AssociationMember", {
     allowNull: false
   },
 
-  
   year: {
     type: DataTypes.STRING,
-    allowNull: true   // change to false if required
+    allowNull: true
+  },
+
+  member_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   }
 
 }, {

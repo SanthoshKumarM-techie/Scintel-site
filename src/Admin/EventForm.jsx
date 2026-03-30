@@ -43,18 +43,13 @@ const StyledBackButton = ({ onClick }) => (
 
 /* ── Core Form Component ── */
 function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTopField }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     title: '', description: '', start_date: '', end_date: '',
     brochure: null, resourceImage: null, resourceName: '', resourceDescription: '',
     participants: '', eventImages: [null], winnerImage: null, winnerName: '',
-    winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }]
-  });
-
-  useEffect(() => {
-    if (initialData && Object.keys(initialData).length > 0) {
-      setForm(prev => ({ ...prev, ...initialData }));
-    }
-  }, [initialData]);
+    winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }],
+    ...initialData
+  }));
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const addImageSlot = () => updateForm('eventImages', [...form.eventImages, null]);
@@ -233,7 +228,7 @@ export function EditEvent() {
         const errData = await response.json();
         alert(`Error: ${errData.message}`);
       }
-    } catch (err) {
+    } catch {
       alert("Update failed.");
     }
   };
@@ -279,7 +274,7 @@ export function AddEvent() {
     try {
       const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) { alert("Added!"); navigate(`/admin/activities/${year}`); }
-    } catch (err) { alert("Failed to add."); }
+    } catch { alert("Failed to add."); }
   };
 
   return (

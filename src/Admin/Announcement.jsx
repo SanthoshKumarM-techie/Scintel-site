@@ -197,7 +197,6 @@ const AnnouncementAdmin = () => {
 
   const sectionRef = useRef(null);
   const fileInputRef = useRef(null);
-  const scrollContainerRef = useRef(null);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -234,10 +233,11 @@ const AnnouncementAdmin = () => {
   };
 
   useEffect(() => {
+    const currentSection = sectionRef.current;
     fetchAnnouncements();
     const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setIsVisible(true); }, { threshold: 0.1 });
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+    if (currentSection) observer.observe(currentSection);
+    return () => { if (currentSection) observer.unobserve(currentSection); };
   }, []);
 
   const showToast = (message) => {
