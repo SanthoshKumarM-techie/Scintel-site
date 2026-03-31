@@ -65,22 +65,108 @@ function DeleteModal({ open, onConfirm, onCancel }) {
 }
 
 const StyledBackButton = ({ onClick }) => (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#083A4B',
-        color: 'white', padding: '8px 20px', borderRadius: '10px', fontSize: '12px',
-        fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease'
-      }}
-      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#388E9C'}
-      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#083A4B'}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-      </svg>
-      Back
-    </button>
+  <button
+    onClick={onClick}
+    style={{
+      display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#083A4B',
+      color: 'white', padding: '8px 20px', borderRadius: '10px', fontSize: '12px',
+      fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s ease'
+    }}
+    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#388E9C'}
+    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#083A4B'}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+    </svg>
+    Back
+  </button>
 );
+
+/* ── Event Card with hover state ── */
+function EventCard({ event, onEdit, onDelete }) {
+  const [hovered, setHovered] = useState(false);
+  const [editHovered, setEditHovered] = useState(false);
+  const [deleteHovered, setDeleteHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        overflow: 'hidden',
+        border: '1px solid #e2e8ec',
+        boxShadow: hovered
+          ? '0 12px 28px -4px rgba(0,0,0,0.18)'
+          : '0 4px 6px -1px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+        transition: 'box-shadow 0.25s ease, transform 0.25s ease',
+      }}
+    >
+      <div style={{
+        width: '100%', height: 180,
+        backgroundColor: '#e2e8f0',
+        backgroundImage: `url(${event.thumbnail})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transition: 'transform 0.3s ease',
+        transformOrigin: 'center',
+        transform: hovered ? 'scale(1.03)' : 'scale(1)',
+      }} />
+
+      <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
+        <p style={{
+          fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 20, flex: 1,
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+        }}>
+          {event.description}
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          {/* Edit Button */}
+          <button
+            onMouseEnter={() => setEditHovered(true)}
+            onMouseLeave={() => setEditHovered(false)}
+            onClick={onEdit}
+            style={{
+              flex: 1, height: 44,
+              backgroundColor: editHovered ? '#2A8E9E' : '#023347',
+              color: '#fff', borderRadius: 12, fontSize: 14,
+              fontWeight: 600, border: 'none', cursor: 'pointer',
+              boxShadow: editHovered ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+              transform: editHovered ? 'translateY(-2px)' : 'translateY(0)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Edit
+          </button>
+
+          {/* Delete Button */}
+          <button
+            onMouseEnter={() => setDeleteHovered(true)}
+            onMouseLeave={() => setDeleteHovered(false)}
+            onClick={onDelete}
+            style={{
+              flex: 1, height: 44,
+              backgroundColor: deleteHovered ? '#b91c1c' : '#023347',
+              color: '#fff', borderRadius: 12, fontSize: 14,
+              fontWeight: 600, border: 'none', cursor: 'pointer',
+              boxShadow: deleteHovered ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+              transform: deleteHovered ? 'translateY(-2px)' : 'translateY(0)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function EventsGrid() {
   const { year } = useParams();
@@ -88,6 +174,7 @@ export default function EventsGrid() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState(null);
+  const [addHovered, setAddHovered] = useState(false);
 
   const fetchEvents = async () => {
     try {
@@ -147,14 +234,18 @@ export default function EventsGrid() {
           <div style={{ display: 'flex', gap: '12px' }}>
             <StyledBackButton onClick={() => navigate('/admin/activities')} />
             <button
-                onClick={() => navigate(`/admin/activities/${year}/add-event`)}
-                style={{
-                  padding: '9px 20px', borderRadius: 8, border: 'none',
-                  backgroundColor: '#0d2233', color: '#fff',
-                  fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                }}
+              onMouseEnter={() => setAddHovered(true)}
+              onMouseLeave={() => setAddHovered(false)}
+              onClick={() => navigate(`/admin/activities/${year}/add-event`)}
+              style={{
+                padding: '9px 20px', borderRadius: 8, border: 'none',
+                backgroundColor: addHovered ? '#2A8E9E' : '#0d2233',
+                color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                transition: 'background-color 0.2s ease, transform 0.2s ease',
+                transform: addHovered ? 'translateY(-2px)' : 'translateY(0)',
+              }}
             >
-                + Add Event
+              + Add Event
             </button>
           </div>
         </div>
@@ -163,7 +254,7 @@ export default function EventsGrid() {
           <p style={{ textAlign: 'center', color: '#64748b', marginTop: '50px' }}>Loading events...</p>
         ) : events.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '100px 0' }}>
-             <p style={{ color: '#64748b' }}>No events found for this batch.</p>
+            <p style={{ color: '#64748b' }}>No events found for this batch.</p>
           </div>
         ) : (
           <div style={{
@@ -173,47 +264,12 @@ export default function EventsGrid() {
             maxWidth: '1200px'
           }}>
             {events.map(event => (
-              <div
+              <EventCard
                 key={event.id}
-                style={{
-                  backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden',
-                  border: '1px solid #e2e8ec', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                  display: 'flex', flexDirection: 'column'
-                }}
-              >
-                <div style={{
-                  width: '100%', height: 180,
-                  backgroundColor: '#e2e8f0',
-                  backgroundImage: `url(${event.thumbnail})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-
-                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
-                  <p style={{
-                    fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 20, flex: 1,
-                    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                  }}>
-                    {event.description}
-                  </p>
-
-                  <div className="flex gap-4 mt-2">
-                    <button
-                      onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}
-                      className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(event.id)}
-                      className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
+                event={event}
+                onEdit={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}
+                onDelete={() => setDeleteId(event.id)}
+              />
             ))}
           </div>
         )}
