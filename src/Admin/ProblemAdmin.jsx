@@ -78,6 +78,16 @@ const normalizeTeamMembers = (teamMembers) => {
   return [];
 };
 
+const readResponsePayload = async (response) => {
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json().catch(() => ({}));
+  }
+
+  const text = await response.text().catch(() => "");
+  return text ? { message: text } : {};
+};
+
 const ProblemAdmin = () => {
   const [activeTab, setActiveTab] = useState('Problems List');
   const [selectedProblem, setSelectedProblem] = useState(null);
@@ -158,7 +168,7 @@ const ProblemAdmin = () => {
     try {
       setActionLoading(endpoint);
       const res = await fetch(`http://localhost:3000/api/admin/${endpoint}`, { method });
-      const result = await res.json();
+      const result = await readResponsePayload(res);
       if (res.ok) {
         showToast(successMsg);
         setSelectedProblem(null);
@@ -170,6 +180,42 @@ const ProblemAdmin = () => {
       showToast("Server error occurred. Please try again.");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleRemoveProblem = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this problem statement?")) return;
+
+    const deleteEndpoints = [
+      `http://localhost:3000/api/admin/current-problems/${id}`,
+      `http://localhost:3000/api/admin/current-problem/${id}`,
+    ];
+
+    try {
+      setLoading(true);
+
+      let lastErrorMessage = "Unable to remove the problem.";
+
+      for (const url of deleteEndpoints) {
+        const response = await fetch(url, { method: "DELETE" });
+        const result = await readResponsePayload(response);
+
+        if (response.ok) {
+          alert("Problem removed.");
+          setSelectedProblem(null);
+          refreshData();
+          return;
+        }
+
+        lastErrorMessage = result.message || lastErrorMessage;
+      }
+
+      alert(lastErrorMessage);
+    } catch (error) {
+      console.error("Problem removal failed:", error);
+      alert("Server error occurred while removing the problem.");
+    } finally {
+      setLoading(false);
     }
   };
 

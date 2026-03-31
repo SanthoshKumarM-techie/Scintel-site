@@ -1,22 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import HarishB from "../assets/HarishB.jpeg";
+import Sasikumarsir from "../assets/Sasikumarsir.webp";
 
 const contacts = [
   {
     id: 1,
-    name: "Aravind Kumar",
-    designation: "Chief Coordinator",
-    phone: "+91 98765 43210",
-    email: "aravind@scintel.org",
-    image: null,
+    name: "Mr.P.Sasikumar",
+    designation: "Faculty Incharge",
+    phone: "9976949310",
+    email: "psacse@kiot.ac.in",
+    image: Sasikumarsir,
   },
   {
     id: 2,
-    name: "Sanjana Rao",
-    designation: "Operations Lead",
-    phone: "+91 87654 32109",
-    email: "sanjana@scintel.org",
-    image: null,
+    name: "Harish B",
+    designation: "Secretary",
+    phone: "9597592496",
+    email: "2k22cse048@kiot.ac.in",
+    image: HarishB,
   },
 ];
 
