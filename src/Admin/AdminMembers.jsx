@@ -208,7 +208,7 @@ export default function AdminMembers() {
                   <tbody className="divide-y divide-gray-100">
                     {batchDetails.members.length > 0 ? (
                       batchDetails.members.map((member) => (
-                        <tr key={member.member_id} className="hover:bg-gray-50">
+                       <tr key={member.member_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                           <td className="px-6 py-5 text-[#023347] font-bold text-center">{member.name}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.register_number || member.phone_number}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.role}</td>
