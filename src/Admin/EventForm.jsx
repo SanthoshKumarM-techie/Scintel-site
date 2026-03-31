@@ -25,8 +25,7 @@ function DropZone({ value, onChange, isThumbnail }) {
         </div>
       )}
       {hasImage ? (
-        // ✅ CHANGED: objectFit 'cover' → 'contain' so full image is visible
-        <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#f0fafc' }} />
+        <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <span>Drag and Drop or <span style={{ color: '#2563eb' }}>choose file</span></span>
       )}
@@ -35,21 +34,20 @@ function DropZone({ value, onChange, isThumbnail }) {
   );
 }
 
-const StyledBackButton = ({ onClick }) => (
-  <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#083A4B', color: 'white', padding: '8px 20px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', border: 'none', cursor: 'pointer' }}>
-    Back
-  </button>
-);
-
 /* ── Core Form Component ── */
 function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTopField }) {
-  const [form, setForm] = useState(() => ({
+  const [form, setForm] = useState({
     title: '', description: '', start_date: '', end_date: '',
     brochure: null, resourceImage: null, resourceName: '', resourceDescription: '',
     participants: '', eventImages: [null], winnerImage: null, winnerName: '',
-    winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }],
-    ...initialData
-  }));
+    winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }]
+  });
+
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setForm(prev => ({ ...prev, ...initialData }));
+    }
+  }, [initialData]);
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const addImageSlot = () => updateForm('eventImages', [...form.eventImages, null]);
@@ -125,8 +123,8 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       ))}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 40 }}>
-        <button type="button" onClick={onCancel} style={{ padding: '10px 25px', borderRadius: 6, border: '1px solid #ccc' }}>Cancel</button>
-        <button type="button" onClick={() => onSubmit(form)} style={{ padding: '10px 30px', borderRadius: 6, background: '#083A4B', color: '#fff', border: 'none' }}>
+        <button type="button" onClick={onCancel} style={{ padding: '10px 25px', borderRadius: 6, border: '1px solid #ccc', cursor: 'pointer' }}>Cancel</button>
+        <button type="button" onClick={() => onSubmit(form)} style={{ padding: '10px 30px', borderRadius: 6, background: '#083A4B', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
           {mode === 'add' ? 'Add Event' : 'Save Changes'}
         </button>
       </div>
@@ -180,7 +178,6 @@ export function EditEvent() {
 
   const handleUpdate = async (formState) => {
     const formData = new FormData();
-
     formData.append('batch', year);
     formData.append('title', formState.title);
     formData.append('description', formState.description);
@@ -216,28 +213,16 @@ export function EditEvent() {
     else formData.append('existing_winner_image', formState.winnerImage || "");
 
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`, {
-        method: 'PUT',
-        body: formData
-      });
-
-      if (response.ok) {
-        alert("Updated!");
-        navigate(`/admin/activities/${year}`);
-      } else {
-        const errData = await response.json();
-        alert(`Error: ${errData.message}`);
-      }
-    } catch {
-      alert("Update failed.");
-    }
+      const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`, { method: 'PUT', body: formData });
+      if (response.ok) { alert("Updated!"); navigate(`/admin/activities/${year}`); }
+      else { const errData = await response.json(); alert(`Error: ${errData.message}`); }
+    } catch (err) { alert("Update failed."); }
   };
 
   if (loading) return <AdminSidebar><div>Loading...</div></AdminSidebar>;
   return (
     <AdminSidebar>
-      {/* ✅ Already has overflowY: 'auto' — no change needed here */}
-      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto' }}>
+      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto', height: '100vh' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Edit Event</h2>
         <EventForm mode="edit" initialData={initialData} onSubmit={handleUpdate} onCancel={() => navigate(-1)} />
       </div>
@@ -274,12 +259,11 @@ export function AddEvent() {
     try {
       const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) { alert("Added!"); navigate(`/admin/activities/${year}`); }
-    } catch { alert("Failed to add."); }
+    } catch (err) { alert("Failed to add."); }
   };
 
   return (
     <AdminSidebar>
-      {/* ✅ CHANGED: Added overflowY: 'auto' and height: '100vh' for scrollability */}
       <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto', height: '100vh' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Add Event to {year}</h2>
         <EventForm mode="add" onSubmit={handleAdd} onCancel={() => navigate(-1)} />
@@ -334,7 +318,6 @@ export function AddNewYear() {
 
   return (
     <AdminSidebar>
-      {/* ✅ CHANGED: Added overflowY: 'auto' and height: '100vh' for scrollability */}
       <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto', height: '100vh' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Create New Academic Year</h2>
         <EventForm mode="add" extraTopField={YearHeader} onSubmit={handleAddYear} onCancel={() => navigate(-1)} />
