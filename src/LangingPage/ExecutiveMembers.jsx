@@ -1,4 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
+import GiriN from "../assets/GiriN.jpeg";
+import HarishB from "../assets/HarishB.jpeg";
+import KavyaS from "../assets/KavyaS.jpeg";
+import NegasriR from "../assets/NegasriR.jpeg";
+import RohithS from "../assets/RohithS.jpeg";
 
 /**
  * SCINTEL PRESTIGE: EXECUTIVE MEMBER COMPONENT
@@ -6,12 +11,12 @@ import React, { useEffect, useState, useRef } from "react";
  */
 
 const members = [
-  { id: 1, name: "Rithish Barath N", designation: "Frontend Developer", image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?&w=400&h=400&q=80" },
-  { id: 2, name: "Rithish Barath N", designation: "UI/UX Designer", image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?&w=400&h=400&q=80" },
-  { id: 3, name: "Rithish Barath N", designation: "Backend Engineer", image: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?&w=400&h=400&q=80" },
-  { id: 4, name: "Rithish Barath N", designation: "Project Manager", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?&w=400&h=400&q=80" },
-  { id: 5, name: "Rithish Barath N", designation: "Data Scientist", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?&w=400&h=400&q=80" },
-  { id: 6, name: "Rithish Barath N", designation: "Content Strategist", image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?&w=400&h=400&q=80" },
+  { id: 1, name: "Harish B", designation: "Secretary", image: HarishB, mail: "2k22cse048@kiot.ac.in", mobile: "9597592496", imagePosition: "50% 20%" },
+  { id: 2, name: "Kavya S", designation: "Joint-Secretary", image: KavyaS, mail: "2k22cse077@kiot.ac.in", mobile: "9994807970", imagePosition: "50% 18%" },
+  { id: 3, name: "Giri N", designation: "Joint-Secretary", image: GiriN, mail: "2k23cse043@kiot.ac.in", mobile: "9345558611", imagePosition: "50% 18%" },
+  { id: 4, name: "Priyanka S S", designation: "Treasurer", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?&w=400&h=400&q=80", mail: "2k22cse121@kiot.ac.in", mobile: "6381244181", imagePosition: "50% 24%" },
+  { id: 5, name: "Nega sri R", designation: "Joint-Treasurer", image: NegasriR, mail: "2k23cse109@kiot.ac.in", mobile: "8946092297", imagePosition: "50% 16%" },
+  { id: 6, name: "Rohith S", designation: "Joint-Treasurer", image: RohithS, mail: "2k23cse133@kiot.ac.in", mobile: "8608900563", imagePosition: "50% 18%" },
 ];
 
 export default function ExecutiveMember() {
@@ -64,7 +69,7 @@ export default function ExecutiveMember() {
               }}
             >
               {/* --- CORPORATE GLASS MODULE --- */}
-              <div className="group relative p-6 rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-white/[0.02] backdrop-blur-[4px] transition-all duration-700 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3 flex items-center gap-6">
+              <div className="group relative flex items-center gap-6 rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-white/[0.02] p-6 backdrop-blur-[4px] transition-all duration-700 hover:-translate-y-3 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10">
                 
                 {/* Image Frame (Circle Variant) */}
                 <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[1.5px] border-[#023347]/10 p-1 transition-all duration-700 group-hover:border-[#D4AF37]/50 flex-shrink-0">
@@ -72,13 +77,14 @@ export default function ExecutiveMember() {
                     <img 
                       src={member.image} 
                       alt={member.name} 
-                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+                      className="h-full w-full object-cover opacity-90 transition-all duration-1000 group-hover:scale-110 group-hover:opacity-100"
+                      style={{ objectPosition: member.imagePosition }}
                     />
                   </div>
                 </div>
 
                 {/* Content Block (Standard Font) */}
-                <div className="flex flex-col min-w-0 font-sans">
+                <div className="flex min-w-0 flex-1 flex-col font-sans">
                   <h3 className="text-xl font-bold text-[#023347] tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 truncate">
                     {member.name}
                   </h3>
@@ -88,6 +94,28 @@ export default function ExecutiveMember() {
                   </p>
 
                   <div className={`h-[1.5px] bg-[#D4AF37] mt-3 transition-all duration-700 ${isVisible ? 'w-8' : 'w-0'} group-hover:w-full`} />
+
+                  <div className="mt-4 space-y-2">
+                    <a
+                      href={`mailto:${member.mail}`}
+                      className="flex items-center gap-2 text-[12px] font-medium text-[#023347]/75 transition-colors duration-300 hover:text-[#B8860B]"
+                    >
+                      <svg className="h-4 w-4 flex-shrink-0 text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 7.5v9A2.25 2.25 0 0 1 19.5 18.75h-15A2.25 2.25 0 0 1 2.25 16.5v-9m19.5 0A2.25 2.25 0 0 0 19.5 5.25h-15A2.25 2.25 0 0 0 2.25 7.5m19.5 0-8.689 5.792a2.25 2.25 0 0 1-2.122 0L2.25 7.5" />
+                      </svg>
+                      <span className="truncate">{member.mail}</span>
+                    </a>
+
+                    <a
+                      href={`tel:${member.mobile}`}
+                      className="flex items-center gap-2 text-[12px] font-medium text-[#023347]/75 transition-colors duration-300 hover:text-[#B8860B]"
+                    >
+                      <svg className="h-4 w-4 flex-shrink-0 text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 4.5A2.25 2.25 0 0 1 4.5 2.25h2.118c.966 0 1.8.691 1.981 1.64l.574 2.986a2.25 2.25 0 0 1-.634 2.045l-1.516 1.516a16.5 16.5 0 0 0 6.54 6.54l1.516-1.516a2.25 2.25 0 0 1 2.045-.634l2.986.574A2.25 2.25 0 0 1 21.75 17.382V19.5a2.25 2.25 0 0 1-2.25 2.25h-.75C9.559 21.75 2.25 14.441 2.25 5.25V4.5Z" />
+                      </svg>
+                      <span>{member.mobile}</span>
+                    </a>
+                  </div>
                 </div>
 
                 {/* Aesthetic Corner Marker */}
