@@ -160,9 +160,10 @@ export default function ActivitiesAdmin() {
           <header className="mb-8 flex-shrink-0">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-[#023347]">Activities</h2>
+              {/* ✅ CHANGED: styled to match Edit button */}
               <button
                 onClick={() => navigate('/admin/activities/add-new-year')}
-                className="bg-[#023347] text-white px-8 py-2.5 rounded-lg font-medium text-sm hover:bg-[#012535] transition-all shadow-md active:scale-95"
+                className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
               >
                 + Add Batch
               </button>
@@ -170,7 +171,7 @@ export default function ActivitiesAdmin() {
             <div className="border-b border-gray-200"></div>
           </header>
 
-          {/* Table Card — style matched to ProblemAdmin */}
+          {/* Table Card */}
           <div className="mx-2 md:mx-4 bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden mb-12">
             <div className="overflow-auto flex-1 no-scrollbar">
               <table className="w-full text-left border-collapse min-w-[700px]">

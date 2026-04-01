@@ -137,6 +137,7 @@ function EventCard({ event, onEdit, onDelete }) {
         backgroundSize: 'cover', backgroundPosition: 'center',
         transition: 'transform 0.3s ease', transformOrigin: 'center',
         transform: hovered ? 'scale(1.03)' : 'scale(1)',
+        flexShrink: 0,
       }} />
       <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
@@ -187,7 +188,7 @@ export default function EventsGrid() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deleteTarget, setDeleteTarget] = useState(null); // { id, title }
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [addHovered, setAddHovered] = useState(false);
   const { toasts, removeToast, showToast } = useToast();
 
@@ -232,7 +233,8 @@ export default function EventsGrid() {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
+    // ✅ FIX: alignItems: 'stretch' ensures sidebar stretches full height on scroll
+    <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '100vh' }}>
       <Toast toasts={toasts} removeToast={removeToast} />
 
       <DeleteModal
@@ -242,7 +244,17 @@ export default function EventsGrid() {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      <AdminSidebar />
+      {/* ✅ FIX: Sidebar wrapper — sticky so it doesn't scroll away and leave a gap */}
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
+        flexShrink: 0,
+        overflowY: 'auto',
+      }}>
+        <AdminSidebar />
+      </div>
+
       <main style={{ flex: 1, padding: '32px 36px', backgroundColor: '#F5F9FA', minHeight: '100vh', overflowY: 'auto' }}>
 
         {/* Header */}

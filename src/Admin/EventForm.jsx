@@ -36,11 +36,15 @@ const GlobalStyles = () => (
       background-color: #fff5f5 !important;
       animation: shake 0.45s ease, flashRed 0.6s ease !important;
     }
-    input:focus, textarea:focus, select:focus {
+    input:focus, textarea:focus {
       border-color: #2A8E9E !important;
       outline: none !important;
       box-shadow: 0 0 0 3px rgba(42,142,158,0.18) !important;
       background-color: #f0fafc !important;
+    }
+    .custom-select-option:hover {
+      background-color: #f0fafc !important;
+      color: #023347 !important;
     }
   `}</style>
 );
@@ -153,6 +157,69 @@ function CancelBtn({ onClick, disabled }) {
 }
 
 /* ─────────────────────────────────────────
+   CUSTOM SELECT (fixes native dropdown black glitch)
+───────────────────────────────────────── */
+function CustomSelect({ value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selected = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block', minWidth: 120 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          padding: '10px 36px 10px 14px', borderRadius: 6, border: '1px solid #d1d5db',
+          backgroundColor: '#fff', fontSize: 13, color: '#023347', fontWeight: 600,
+          cursor: 'pointer', width: '100%', textAlign: 'left', position: 'relative',
+          boxSizing: 'border-box',
+        }}
+      >
+        {selected?.label || value}
+        <span style={{
+          position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${open ? 180 : 0}deg)`,
+          transition: 'transform 0.2s', pointerEvents: 'none', color: '#64748b',
+        }}>▾</span>
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 9999,
+          backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: '100%',
+          maxHeight: 220, overflowY: 'auto',
+        }}>
+          {options.map(opt => (
+            <div
+              key={opt.value}
+              className="custom-select-option"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              style={{
+                padding: '10px 16px', fontSize: 13, cursor: 'pointer',
+                color: opt.value === value ? '#2A8E9E' : '#374151',
+                fontWeight: opt.value === value ? 700 : 400,
+                backgroundColor: opt.value === value ? '#f0fafc' : '#fff',
+                transition: 'background-color 0.15s',
+              }}
+            >
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
 const emptyTestimonial = () => ({ name: '', className: '', feedback: '' });
@@ -198,25 +265,152 @@ const appendTestimonials = (formData, testimonials = []) => {
 };
 
 /* ─────────────────────────────────────────
-   DROPZONE
+   DROPZONE — supports images + PDF
 ───────────────────────────────────────── */
-function DropZone({ value, onChange }) {
-  const ref = useRef();
-  const previewUrl = value instanceof File ? URL.createObjectURL(value) : value;
-  const hasImage = value && value !== 'Not Applicable' && value !== '';
+function DropZone({ value, onChange, acceptPdf = false }) {
+  const inputRef = useRef(null);
+  const dragCounter = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+
+  useEffect(() => {
+    const stopWindowDrop = (e) => e.preventDefault();
+    window.addEventListener('dragover', stopWindowDrop);
+    window.addEventListener('drop', stopWindowDrop);
+
+    return () => {
+      window.removeEventListener('dragover', stopWindowDrop);
+      window.removeEventListener('drop', stopWindowDrop);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (value instanceof File) {
+      const objectUrl = URL.createObjectURL(value);
+      setPreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+    setPreviewUrl(value || '');
+  }, [value]);
+
+  const isFile = value instanceof File;
+  const hasValue = Boolean(value && value !== 'Not Applicable' && value !== '');
+  const isPdf = isFile
+    ? value.type === 'application/pdf' || value.name.toLowerCase().endsWith('.pdf')
+    : typeof previewUrl === 'string' && previewUrl.toLowerCase().endsWith('.pdf');
+
+  const accept = acceptPdf
+    ? 'image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,.pdf,application/pdf'
+    : 'image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg';
+
+  const isAllowed = (file) => {
+    if (!file) return false;
+
+    const type = (file.type || '').toLowerCase();
+    const name = (file.name || '').toLowerCase();
+
+    if (type.startsWith('image/')) return true;
+    if (/\.(png|jpe?g|gif|webp|bmp|svg|avif|jfif|heic|heif)$/i.test(name)) return true;
+    if (acceptPdf && (type === 'application/pdf' || name.endsWith('.pdf'))) return true;
+
+    return false;
+  };
+
+  const getDroppedFiles = (e) => {
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length) return files;
+
+    return Array.from(e.dataTransfer?.items || [])
+      .filter((item) => item.kind === 'file')
+      .map((item) => item.getAsFile())
+      .filter(Boolean);
+  };
+
+  const handleFiles = (files) => {
+    const file = files?.[0];
+    if (!file || !isAllowed(file)) return;
+    onChange(file);
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    setDragging(true);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    setDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setDragging(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setDragging(false);
+    handleFiles(getDroppedFiles(e));
+  };
+
   return (
-    <div onClick={() => ref.current.click()} style={{
-      border: '1.5px dashed #9bd3e0', borderRadius: 8, height: 130,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#f0fafc', cursor: 'pointer', overflow: 'hidden',
-      position: 'relative', fontSize: 13, color: '#64748b', marginBottom: '10px',
-    }}>
-      {hasImage
-        ? <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : <span>Drag and Drop or <span style={{ color: '#2563eb' }}>choose file</span></span>
-      }
-      <input ref={ref} type="file" hidden accept="image/*"
-        onChange={e => { if (e.target.files[0]) onChange(e.target.files[0]); }} />
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => inputRef.current?.click()}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{
+        border: `2px dashed ${dragging ? '#2A8E9E' : '#9bd3e0'}`,
+        borderRadius: 8,
+        height: 130,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: dragging ? '#e8f7fa' : '#f0fafc',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      {hasValue ? (
+        isPdf ? <div>{isFile ? value.name : String(previewUrl).split('/').pop()}</div> : (
+          <img
+            src={previewUrl}
+            alt="preview"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+          />
+        )
+      ) : (
+        <span style={{ pointerEvents: 'none' }}>
+          {dragging ? 'Drop file here' : 'Drag and drop or choose file'}
+        </span>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        hidden
+        accept={accept}
+        onChange={(e) => {
+          handleFiles(e.target.files);
+          e.target.value = '';
+        }}
+      />
     </div>
   );
 }
@@ -252,25 +446,25 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     if (errors[key]) setErrors(prev => ({ ...prev, [key]: false }));
   };
 
-  const addImageSlot     = ()           => updateForm('eventImages', [...form.eventImages, null]);
-  const updateImageSlot  = (i, v)       => { const a = [...form.eventImages]; a[i] = v; updateForm('eventImages', a); };
-  const clearImageSlot   = (i)          => { const a = [...form.eventImages]; a[i] = null; updateForm('eventImages', a); };
-  const removeImageSlot  = (i)          => {
+  const addImageSlot     = ()      => updateForm('eventImages', [...form.eventImages, null]);
+  const updateImageSlot  = (i, v)  => { const a = [...form.eventImages]; a[i] = v; updateForm('eventImages', a); };
+  const clearImageSlot   = (i)     => { const a = [...form.eventImages]; a[i] = null; updateForm('eventImages', a); };
+  const removeImageSlot  = (i)     => {
     const r = form.eventImages.filter((_, idx) => idx !== i);
     updateForm('eventImages', r.length > 0 ? r : [null]);
   };
-  const updateTestimonial = (i, f, v)  => { const t = [...form.testimonials]; t[i][f] = v; updateForm('testimonials', t); };
-  const addTestimonial    = ()          => updateForm('testimonials', [...form.testimonials, emptyTestimonial()]);
-  const removeTestimonial = (i)        => {
+  const updateTestimonial = (i, f, v) => { const t = [...form.testimonials]; t[i][f] = v; updateForm('testimonials', t); };
+  const addTestimonial    = ()        => updateForm('testimonials', [...form.testimonials, emptyTestimonial()]);
+  const removeTestimonial = (i)       => {
     const n = form.testimonials.filter((_, idx) => idx !== i);
     updateForm('testimonials', n.length > 0 ? n : [emptyTestimonial()]);
   };
 
   const validate = () => {
     const e = {};
-    if (!form.title.trim())              e.title        = true;
-    if (!form.start_date)                e.start_date   = true;
-    if (!form.description.trim())        e.description  = true;
+    if (!form.title.trim())                e.title        = true;
+    if (!form.start_date)                  e.start_date   = true;
+    if (!form.description.trim())          e.description  = true;
     if (!String(form.participants).trim()) e.participants = true;
     return e;
   };
@@ -333,8 +527,9 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
         value={form.description} onChange={e => updateForm('description', e.target.value)} />
       <ErrMsg show={errors.description} />
 
+      {/* ── Brochure: now a DropZone (supports images + PDF) ── */}
       <label style={labelStyle}>Brochure (File/Image)</label>
-      <input type="file" style={base} onChange={e => updateForm('brochure', e.target.files[0])} />
+      <DropZone value={form.brochure} onChange={v => updateForm('brochure', v)} acceptPdf={true} />
       {form.brochure && clearBtn(() => updateForm('brochure', null))}
 
       <h3 style={sectionTitle}>Resource Person</h3>
@@ -575,13 +770,22 @@ export function AddNewYear() {
   const { toasts, removeToast, showToast } = useToast();
   const batch = `${startYear}-${String(startYear + 1).slice(2)}`;
 
+  const yearOptions = [...Array(10)].map((_, i) => ({
+    value: currentYear - 2 + i,
+    label: String(currentYear - 2 + i),
+  }));
+
   const YearHeader = (
     <div style={{ marginBottom: 25, padding: '20px', background: '#f0fafc', borderRadius: 10, border: '1px solid #9bd3e0' }}>
       <label style={{ fontWeight: '700', color: '#083A4B', display: 'block', marginBottom: 10 }}>Select Academic Year</label>
-      <select value={startYear} onChange={e => setStartYear(Number(e.target.value))} style={{ padding: '10px', borderRadius: 6 }}>
-        {[...Array(10)].map((_, i) => <option key={i} value={currentYear - 2 + i}>{currentYear - 2 + i}</option>)}
-      </select>
-      <span style={{ marginLeft: 20, fontWeight: 'bold', color: '#3DA6B6' }}>New Batch: {batch}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <CustomSelect
+          value={startYear}
+          onChange={(val) => setStartYear(Number(val))}
+          options={yearOptions}
+        />
+        <span style={{ fontWeight: 'bold', color: '#3DA6B6' }}>New Batch: {batch}</span>
+      </div>
     </div>
   );
 
