@@ -351,5 +351,7 @@ SanthoshKumar M
 Software Developer focused on Java, Data Structures & Algorithms, frontend development, UI/UX design, and full-stack application development.
 
 GitHub: [SanthoshKumarM](https://github.com/SanthoshKumarM-techie)
+
 LinkedIn: www.linkedin.com/in/santhoshkumar-m-576951368
+
 Portfolio: Add your portfolio
